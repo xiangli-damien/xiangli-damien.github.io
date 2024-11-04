@@ -21,20 +21,24 @@ social: true # includes social icons at the bottom of the page
 
 I'm <a href='#'>Xiang Li</a>, an M.S. student in Computer Science at the University of Chicago, set to graduate in March 2025. I'm actively seeking <a href='#'>full-time SWE</a> and <a href='#'>Research Assitant</a>. opportunities where I can apply my academic knowledge to practical, real-world challenges.
 
+<br>
+
 #### My Expertise
 
 My core focus lies in <a href='#'>backend development</a> with a strong foundation in **Java** and the **Spring ecosystem**. I have experience contributing to **enterprise-level projects**. 
 
 With a keen interest in distributed systems and cloud computing, I’m also expanding my knowledge in AI and big data architecture to stay at the forefront of innovation.
 
+<br>
+
 #### Interests and Exploration
 
 In addition to backend development, I have some experience with React.js and Node.js for frontend work, which helps me provide a well-rounded, full-stack perspective. I enjoy learning continuously and documenting my journey through **public projects** and **technical notes**.
 
 
-
-
-
+<br>
+<br>
+<br>
 
 ---
 
