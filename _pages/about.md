@@ -19,7 +19,7 @@ social: true # includes social icons at the bottom of the page
 
 #### Hello! 👋
 
-I'm <a href='#'>Xiang Li</a>, an M.S. candidate in Computer Science at the University of Chicago, set to graduate in March 2025. I'm actively seeking <a href='#'>full-time SWE</a> and <a href='#'>Research Assitant</a>. opportunities where I can apply my academic knowledge to practical, real-world challenges.
+I'm <a href='#'>Xiang Li</a>, an M.S. student in Computer Science at the University of Chicago, set to graduate in March 2025. I'm actively seeking <a href='#'>full-time SWE</a> and <a href='#'>Research Assitant</a>. opportunities where I can apply my academic knowledge to practical, real-world challenges.
 
 #### My Expertise
 
