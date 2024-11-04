@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Motto. Etc.
+## subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Motto. Etc.
 
 profile:
   align: right
@@ -14,12 +14,12 @@ profile:
 
 news: false # includes a list of news items
 selected_papers: false # includes a list of papers marked as "selected={true}"
-social: false # includes social icons at the bottom of the page
+social: true # includes social icons at the bottom of the page
 ---
 
 #### Hello! 👋
 
-I'm <a href='#'>**Xiang Li**</a>, an M.S. candidate in Computer Science at the University of Chicago, set to graduate in March 2025. I'm actively seeking <a href='#'>**full-time SWE**</a> and <a href='#'>**Research Assitant**</a>. opportunities where I can apply my academic knowledge to practical, real-world challenges.
+I'm <a href='#'>Xiang Li</a>, an M.S. candidate in Computer Science at the University of Chicago, set to graduate in March 2025. I'm actively seeking <a href='#'>full-time SWE</a> and <a href='#'>Research Assitant</a>. opportunities where I can apply my academic knowledge to practical, real-world challenges.
 
 #### My Expertise
 
@@ -34,9 +34,11 @@ In addition to backend development, I have some experience with React.js and Nod
 
 
 
+
+
 ---
 
-This website serves as my personal hub, showcasing my work and sharing insights on topics that inspire me. Feel free to explore my projects, check out my [**GitHub**](https://github.com/xiangli-damien), or connect with me on [**LinkedIn**](https://www.linkedin.com/in/xiangli-damien). Let’s collaborate and push the boundaries of what's possible together!
+This website serves as my personal hub, showcasing my work and sharing insights on topics that inspire me. Feel free to explore my projects, check out my [<a href='#'>GitHub</a>](https://github.com/xiangli-damien), or connect with me on <a href='#'>[LinkedIn](https://www.linkedin.com/in/xiangli-damien)</a>. Let’s collaborate and push the boundaries of what's possible together!
 
 
 **Thank you for visiting my page!**
