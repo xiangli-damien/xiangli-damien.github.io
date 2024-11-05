@@ -6,7 +6,7 @@ permalink: /
 
 profile:
   align: right
-  image: xiangli-2.jpg
+  image: xiangli-4.jpg
   image_circular: false # crops the image to make it circular
   more_info: >
     <p>University of Chicago</p>
