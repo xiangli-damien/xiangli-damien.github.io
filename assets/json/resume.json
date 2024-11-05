@@ -86,7 +86,6 @@
       {
         "name": "High-Performance Distributed RPC Framework",
         "summary": "Built a distributed RPC framework with Netty, supporting multiple serialization algorithms and load-balancing strategies.",
-        "highlights": ["Handled 2000+ requests per second with custom load balancing."],
         "startDate": "2024-04",
         "endDate": "2024-08",
         "url": ""
@@ -94,7 +93,6 @@
       {
         "name": "SaaS Genomics Annotation Service - Uchicago Globus Lab",
         "summary": "Developed a cloud-based genomics annotation platform on AWS with real-time notifications and dynamic scaling.",
-        "highlights": ["Automated data transitions with AWS S3 and Glacier, integrated Google login with OAuth 2.0."],
         "startDate": "2024-02",
         "endDate": "2024-05",
         "url": ""
