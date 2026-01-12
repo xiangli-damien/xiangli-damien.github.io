@@ -1,23 +1,39 @@
 export function basePath(){
   // GitHub Pages auto base detection:
-  // - user site: https://username.github.io/  -> base "/"
-  // - project site: https://username.github.io/repo/ -> base "/repo/"
+  // For user site (username.github.io), always return "/"
+  // For project site (username.github.io/repo/), return "/repo/"
+  
+  // Check if it's a user site by checking hostname pattern
+  // username.github.io -> user site (base "/")
+  // username.github.io/repo/ -> project site (base "/repo/")
+  
   if(location.hostname.endsWith("github.io")){
-    const parts = location.pathname.split("/").filter(Boolean);
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    
+    // Empty path -> user site
+    if(pathParts.length === 0) return "/";
+    
+    // Known page directories -> user site
     const knownPages = new Set(["pubs","blog","misc","projects","assets","data","serverless"]);
+    if(knownPages.has(pathParts[0])) return "/";
     
-    // Empty path or root -> user site
-    if(parts.length === 0) return "/";
+    // index.html or 404.html -> user site
+    if(pathParts[0] === "index.html" || pathParts[0] === "404.html") return "/";
     
-    // If first part is a known page, it's a user site
-    if(knownPages.has(parts[0])) return "/";
+    // For user sites, if we're in a subdirectory, still return "/"
+    // Only treat as project site if the first segment is NOT a known page
+    // Since we already checked knownPages above, this should be rare
+    // But to be safe, check if hostname matches user site pattern
+    const hostParts = location.hostname.split(".");
+    if(hostParts.length >= 3 && hostParts[hostParts.length - 2] === "github" && hostParts[hostParts.length - 1] === "io") {
+      // This is username.github.io format -> user site
+      return "/";
+    }
     
-    // If first part is index.html or 404.html, it's root
-    if(parts[0] === "index.html" || parts[0] === "404.html") return "/";
-    
-    // Otherwise, assume it's a project site
-    return "/" + parts[0] + "/";
+    // Fallback: assume project site
+    return "/" + pathParts[0] + "/";
   }
+  
   // Local development
   return "/";
 }

@@ -14,9 +14,13 @@ function stripTrailing(p){
 }
 function isActive(path){
   const cur = stripTrailing(location.pathname);
-  const target = stripTrailing(BASE + path);
-  if(path === "") return cur === stripTrailing(BASE);
-  return cur.startsWith(target);
+  // For user site, BASE is "/", so BASE + path should be just path
+  const targetPath = path === "" ? "/" : "/" + path.replace(/^\/+|\/+$/g, "");
+  const target = stripTrailing(targetPath);
+  if(path === "") return cur === "/" || cur === "";
+  // Remove BASE prefix if present, then compare
+  const curWithoutBase = cur.startsWith(BASE) ? cur.slice(BASE.length) : cur;
+  return curWithoutBase.startsWith(target) || cur === target;
 }
 
 function applyTheme(theme){
@@ -82,11 +86,16 @@ function buildDock(wm){
     </div>
 
     <div class="dockRow dockApps" aria-label="Navigation">
-      ${items.map(it => `
-        <a data-tip="${it.label}" href="${BASE}${it.href}" class="dockApp ${isActive(it.href) ? "is-active" : ""}">
+      ${items.map(it => {
+        // Ensure href starts with / and BASE ends with /
+        const cleanHref = it.href.startsWith("/") ? it.href : "/" + it.href;
+        const fullHref = BASE === "/" ? cleanHref : BASE.replace(/\/$/, "") + cleanHref;
+        return `
+        <a data-tip="${it.label}" href="${fullHref}" class="dockApp ${isActive(it.href) ? "is-active" : ""}">
           ${it.label}
         </a>
-      `).join("")}
+      `;
+      }).join("")}
     </div>
 
     <div class="dockRow dockRight" aria-label="System">
@@ -103,7 +112,7 @@ function buildDock(wm){
   backBtn.addEventListener("click", ()=>{
     // If there is no meaningful history, go Home
     if(history.length > 1) history.back();
-    else location.href = `${BASE}`;
+    else location.href = BASE === "/" ? "/" : BASE;
   });
 
   // FX
