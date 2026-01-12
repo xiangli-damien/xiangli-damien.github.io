@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html data-fx="clean" data-theme="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/>
+<link href="../assets/css/system.css" rel="stylesheet"/>
+<title>Post • Xiang Li</title>
+</head>
+<body data-page="post">
+<div class="page">
+<main aria-label="Post desktop" class="mainWrap">
+<section class="win" data-clickfx="wobble" data-label="post" data-win="post" style="--x: 60px; --y: 30px; --w: 840px;">
+<div class="titlebar">
+<div class="tb-left"></div>
+<div class="tb-title"><span class="cmd" data-typing="1">$ cat post.md</span></div>
+<div class="tb-right"><a class="muted" href="./" id="backToBlog" style="text-decoration:none; font-family:var(--mono)">cd blog/</a></div>
+</div>
+<div class="content">
+<div style="margin-bottom:10px;">
+<div id="postTitle" style="font-size:18px; font-weight:800;"></div>
+<div class="muted" id="postSub" style="font-family:var(--mono); font-size:12px; margin-top:4px;"></div>
+</div>
+<div id="postContent"></div>
+</div>
+<div class="muted" id="fatal" style="position:absolute; left:38px; top:12px; font-family:var(--mono); font-size:12px;"></div>
+</main>
+</div>
+<nav aria-label="Site dock" class="dock" id="dock"></nav>
+<script src="../assets/js/site.js" type="module"></script>
+</body>
+</html>

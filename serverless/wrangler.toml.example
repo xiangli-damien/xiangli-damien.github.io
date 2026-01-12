@@ -1,0 +1,11 @@
+name = "phd-footprints"
+main = "cloudflare-worker.js"
+compatibility_date = "2025-01-01"
+
+# Create a KV namespace and put its id here:
+[[kv_namespaces]]
+binding = "VISITS"
+id = "YOUR_KV_ID"
+
+[vars]
+ALLOWED_ORIGIN = "https://YOUR_GITHUB_IO_DOMAIN"

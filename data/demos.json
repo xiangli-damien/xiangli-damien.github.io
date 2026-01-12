@@ -1,0 +1,21 @@
+[
+  {
+    "id": "lens-traj",
+    "title": "Trajectory lens: follow the path",
+    "media": {
+      "type": "gif",
+      "src": "assets/media/trajectory_demo.gif",
+      "alt": "trajectory demo"
+    },
+    "caption_md": "A tiny animated illustration of a **trajectory**. On the right, the Lens module runs a real-time version.",
+    "question": "If a hidden-state trajectory shows abrupt direction changes across layers, what might it indicate?",
+    "options": [
+      "Stable reasoning",
+      "Representation anomaly / potential hallucination",
+      "Purely longer context",
+      "Nothing; it's random"
+    ],
+    "answerIndex": 1,
+    "explanation_md": "Sudden turns can correlate with **state-space instability** (e.g., shifting modes). A lens tries to quantify this without labels."
+  }
+]

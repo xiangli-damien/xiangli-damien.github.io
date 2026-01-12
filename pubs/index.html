@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html data-fx="clean" data-theme="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/>
+<link href="../assets/css/system.css" rel="stylesheet"/>
+<title>Pubs • Xiang Li</title>
+</head>
+<body data-page="pubs">
+<div class="page">
+<main aria-label="Publications desktop" class="mainWrap">
+<section class="win" data-clickfx="jitter" data-label="filters" data-win="filters" style="--x: 60px; --y: 30px; --w: 330px;">
+<div class="titlebar">
+<div class="tb-left"></div>
+<div class="tb-title"><span class="cmd" data-typing="1">$ pubs --filter</span></div>
+<div class="tb-right"></div>
+</div>
+<div class="content">
+<div style="display:grid; gap:10px;">
+<div>
+<label for="pubQuery">Search</label>
+<input id="pubQuery" placeholder="title / author / venue" type="text"/>
+</div>
+<div>
+<label for="pubType">Type</label>
+<select id="pubType"></select>
+</div>
+<div>
+<label for="pubYear">Year</label>
+<select id="pubYear"></select>
+</div>
+</div>
+</div>
+</section>
+<section class="win" data-clickfx="wobble" data-label="pubs.db" data-win="pubs" style="--x: 410px; --y: 30px; --w: 750px;">
+<div class="titlebar">
+<div class="tb-left"></div>
+<div class="tb-title"><span class="cmd" data-typing="1">$ cat pubs.db</span></div>
+<div class="tb-right"><a class="muted" href="../" style="text-decoration:none; font-family:var(--mono)">cd ..</a></div>
+</div>
+<div class="content">
+<div id="pubList"></div>
+</div>
+</section>
+<section class="win is-closed" data-clickfx="blink" data-label="modal" data-win="modal" id="modalWin" style="--x: 220px; --y: 140px; --w: 560px;">
+<div class="titlebar">
+<div class="tb-left"></div>
+<div class="tb-title"><span class="cmd" data-typing="1" id="modalTitle">$ modal</span></div>
+<div class="tb-right"><button aria-label="Close modal" class="tb-btn" data-tip="Close" id="modalClose">×</button></div>
+</div>
+<div class="content">
+<div id="modalBody"></div>
+<pre id="modalPre" style="white-space:pre-wrap; font-family:var(--mono); font-size:12px; line-height:1.4; display:none;"></pre>
+</div>
+</section>
+<div class="muted" id="fatal" style="position:absolute; left:38px; top:12px; font-family:var(--mono); font-size:12px;"></div>
+</main>
+</div>
+<nav aria-label="Site dock" class="dock" id="dock"></nav>
+<script src="../assets/js/site.js" type="module"></script>
+</body>
+</html>

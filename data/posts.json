@@ -1,0 +1,13 @@
+[
+  {
+    "slug": "discovering-geometry-in-hidden-states",
+    "title": "Discovering Geometry in Hidden States",
+    "date": "2026-01-20",
+    "tags": [
+      "interpretability",
+      "geometry",
+      "research"
+    ],
+    "summary": "What can we learn by looking at how representations move through space during inference? Exploring geometric patterns in hidden state trajectories."
+  }
+]

@@ -1,0 +1,116 @@
+[
+  {
+    "title": "End-to-end Cell Recognition via BERT-style Translation",
+    "year": 2025,
+    "tags": [
+      "transformers",
+      "3D",
+      "self-supervised",
+      "computer vision"
+    ],
+    "description": "Novel approach to 3D cell recognition by representing point clouds as token sequences and applying BERT-style transformer architecture. Implemented masked point modeling and contrastive pretraining for self-supervised learning on synthetic high-overlap cell pairs. Built encoder-decoder architecture that translates point clouds directly to cell identities, achieving AUROC > 0.85 with ~1ms inference latency per cell, eliminating the need for traditional multi-stage cell tracking pipelines.",
+    "media": {
+      "type": "img",
+      "src": "assets/img/cell.png",
+      "alt": "Cell recognition pipeline"
+    },
+    "links": {
+      "code": "",
+      "paper": "",
+      "demo": ""
+    }
+  },
+  {
+    "title": "Chicago Crime Big Data Application",
+    "year": 2024,
+    "tags": [
+      "big data",
+      "Hive",
+      "Scala",
+      "distributed computing",
+      "data pipeline",
+      "ETL"
+    ],
+    "description": "Large-scale big data platform for processing and analyzing Chicago crime datasets using distributed computing infrastructure. Built scalable ETL pipelines with Hive for data warehousing and Scala for distributed data processing. Implemented efficient data ingestion, transformation, and aggregation workflows supporting high-throughput batch processing and real-time analytics on petabyte-scale datasets.",
+    "media": {
+      "type": "img",
+      "src": "assets/img/chicrime.png",
+      "alt": "Chicago crime big data application"
+    },
+    "links": {
+      "code": "",
+      "paper": "",
+      "demo": ""
+    }
+  },
+  {
+    "title": "Raft Message Queue (RMQ)",
+    "year": 2024,
+    "tags": [
+      "distributed systems",
+      "consensus algorithms",
+      "Raft",
+      "Python",
+      "fault tolerance",
+      "message queue"
+    ],
+    "description": "Distributed message queue system implementing the Raft consensus algorithm for fault-tolerant log replication and leader election. Designed RESTful APIs for topic management, message publication/consumption, and cluster coordination. Implemented thread-safe state machines with distributed log replication, ensuring strong consistency and availability under network partitions. Supports persistent message storage and ordered message delivery across distributed nodes.",
+    "media": {
+      "type": "img",
+      "src": "assets/img/raft.svg",
+      "alt": "Raft Message Queue architecture"
+    },
+    "links": {
+      "code": "https://github.com/xli0808/RaftMessageQueue",
+      "paper": "",
+      "demo": ""
+    }
+  },
+  {
+    "title": "Netty-Spring-ZK RPC Framework",
+    "year": 2023,
+    "tags": [
+      "RPC",
+      "Netty",
+      "ZooKeeper",
+      "Spring",
+      "distributed systems",
+      "microservices",
+      "Java"
+    ],
+    "description": "High-performance lightweight RPC framework built with Netty for NIO-based network communication, ZooKeeper for service registration/discovery, and Spring for dependency injection. Implemented custom message protocol with codec to solve TCP sticky packet/fragmentation issues, multiple serialization algorithms (JDK, JSON, Protostuff), load balancing (round-robin, random, consistent hashing), dynamic proxy (JDK/CGLIB), channel multiplexing, asynchronous invocation with CompletableFuture, heartbeat mechanism, and fault tolerance with token bucket flow control. Supports service local caching with dynamic updates and Guava-Retry for idempotent service retries.",
+    "media": {
+      "type": "img",
+      "src": "assets/img/netty.png",
+      "alt": "Netty-Spring-ZK RPC Framework architecture"
+    },
+    "links": {
+      "code": "",
+      "paper": "",
+      "demo": ""
+    }
+  },
+  {
+    "title": "msh - Lite Shell",
+    "year": 2023,
+    "tags": [
+      "C",
+      "systems programming",
+      "Unix",
+      "process management",
+      "signal handling",
+      "shell"
+    ],
+    "description": "Lightweight Linux shell implementation in C demonstrating core operating system concepts. Implemented command parsing and execution using fork/exec system calls, signal handlers for SIGINT/SIGTSTP to support keyboard interruption and job suspension, job control for foreground/background process management, command history persistence with configurable limits, file redirection for batch execution, and built-in commands (jobs, bg, fg, kill, history). Features thread-safe state management and demonstrates low-level system programming with process creation, signal masking, and inter-process communication.",
+    "media": {
+      "type": "img",
+      "src": "assets/img/unix.webp",
+      "alt": "msh shell implementation"
+    },
+    "links": {
+      "code": "",
+      "paper": "",
+      "demo": ""
+    }
+  }
+]

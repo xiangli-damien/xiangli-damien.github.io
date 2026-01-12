@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4fff8"/>
+      <stop offset="1" stop-color="#fff8e6"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" rx="48" fill="url(#g)"/>
+  <g fill="none" stroke="#0b1020" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.22">
+    <path d="M78 90c12-18 72-18 84 0"/>
+    <path d="M88 120c10-8 22-12 32-12s22 4 32 12"/>
+    <path d="M100 150c12 18 28 22 40 22s28-4 40-22"/>
+  </g>
+  <g fill="#2b5fff" opacity="0.14">
+    <circle cx="84" cy="70" r="18"/>
+    <circle cx="156" cy="70" r="18"/>
+    <rect x="86" y="64" width="68" height="12" rx="6"/>
+    <rect x="74" y="190" width="92" height="10" rx="5"/>
+  </g>
+  <text x="120" y="220" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace" font-size="14" fill="#0b1020" opacity="0.55">AI avatar 3</text>
+</svg>

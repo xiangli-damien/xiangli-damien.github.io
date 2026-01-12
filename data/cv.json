@@ -1,0 +1,103 @@
+{
+  "education": [
+    {
+      "where": "University of Chicago",
+      "what": "M.S. Computer Science",
+      "when": "Sep 2023 – Mar 2025",
+      "where2": "Chicago, IL"
+    },
+    {
+      "where": "Sichuan University–Pittsburgh Institute",
+      "what": "B.S. Industrial Engineering",
+      "when": "Sep 2019 – Jun 2023",
+      "where2": "Chengdu, China"
+    }
+  ],
+  "experience": [
+    {
+      "title": "Geometry-based trajectory analysis for LLM confidence prediction",
+      "subtitle": "Research Assistant | Advised by Prof. Jiawei Zhou",
+      "when": "Mar 2025 – Present",
+      "where": "Chicago, IL",
+      "bullets": [
+        "Developed geometry heuristic metrics on hidden-state trajectories to predict LLM generation correctness without ground-truth labels, outperforming SOTA methods.",
+        "Analyzed activation patterns as high-dimensional \"images\" across token, layer, and dimension axes, identifying anomaly signatures for hallucination/correctness detection.",
+        "Applied a compact, physics-inspired metric suite for correctness detection, revealing distinct trajectory signatures of reasoning modes and improving AUROC by ~8% on seven datasets over Strong Baseline."
+      ]
+    },
+    {
+      "title": "Unsupervised cluster-as-lens for LLMs",
+      "subtitle": "Research Assistant | Advised by Prof. Jiawei Zhou",
+      "when": "Mar 2025 – Present",
+      "where": "Chicago, IL",
+      "bullets": [
+        "Developed layer-wise clustering in hidden-state space to track cluster emergence/splitting/merging across depth, revealing concept formation and information bottlenecks.",
+        "Identified cluster transitions to improve hallucination detection, safety checks, and knowledge editing."
+      ]
+    },
+    {
+      "title": "Time-series forecasting of emergency department visits",
+      "subtitle": "Research Assistant | Advised by Prof. Ta-Ping Lu",
+      "when": "Jun 2022 – Jul 2023",
+      "where": "Chengdu, China",
+      "bullets": [
+        "Integrated ED visits (2019–2021) with weather, air-quality, and COVID-19 data for time-series forecasting.",
+        "Benchmarked 10+ models, including traditional ML (SVM, Random Forest) and time-series methods (ARIMA, LSTM), identifying a hybrid VMD-LSTM model as best-performing (MAPE 5.29%, RMSE 51.89).",
+        "Optimized VMD-LSTM via hyperparameter tuning and covariate analysis; ran sensitivity and scenario analyses to assess robustness and support ED capacity/staffing planning."
+      ]
+    }
+  ],
+  "teaching": [
+    {
+      "title": "Teaching Assistant, MPCS 52060 Parallel Programming, UChicago",
+      "when": "Jan 2025 – Mar 2025; Sep 2025 – Present"
+    },
+    {
+      "title": "Teaching Assistant, Engineering Management, SCU",
+      "when": "Sep 2022 – Jan 2023"
+    },
+    {
+      "title": "Teaching Assistant, Probabilistic Methods in Operations Research, SCU",
+      "when": "Feb 2022 – Jun 2022"
+    },
+    {
+      "title": "Teaching Assistant, Statistical Testing and Regression, SCU",
+      "when": "Sep 2021 – Jan 2022"
+    }
+  ],
+  "honors": [
+    {
+      "title": "Outstanding Graduate Student Award (Top 10%), Sichuan University",
+      "when": "2023"
+    },
+    {
+      "title": "Dean's List (4/78), Sichuan University",
+      "when": "2022"
+    },
+    {
+      "title": "Outstanding Student Leader Award, Sichuan University",
+      "when": "2019, 2020, 2021"
+    },
+    {
+      "title": "University-Level Scholarship, Sichuan University",
+      "when": "2020, 2021"
+    }
+  ],
+  "skills": {
+    "Programming": [
+      "Python",
+      "Java",
+      "C",
+      "Golang",
+      "SQL",
+      "LaTeX"
+    ],
+    "Frameworks": [
+      "PyTorch",
+      "Hugging Face Transformers",
+      "Docker",
+      "vLLM",
+      "Slurm"
+    ]
+  }
+}

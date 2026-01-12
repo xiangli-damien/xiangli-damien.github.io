@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html data-fx="clean" data-theme="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/>
+<link href="assets/css/system.css" rel="stylesheet"/>
+<title>Home • Xiang Li</title>
+</head>
+<body data-page="home">
+<div class="page">
+<main aria-label="Desktop" class="desktop">
+
+<!-- Home is intentionally minimal: 4 windows only (whoami, profile, lens, updates). -->
+
+<section class="win" data-cat="peek" data-clickfx="burst" data-label="whoami" data-win="whoami" style="--x: 52px; --y: 52px; --w: 430px;">
+<div class="titlebar">
+<div class="tb-left"></div>
+<div class="tb-title"><span class="cmd" data-typing="1">$ whoami</span></div>
+<div class="tb-right"><span class="muted">drag</span></div>
+</div>
+<div class="content" id="whoami"></div>
+</section>
+<section class="win" data-clickfx="wobble" data-label="profile" data-win="about" style="--x: 52px; --y: 420px; --w: 430px;">
+<div class="titlebar">
+<div class="tb-left"></div>
+<div class="tb-title"><span class="cmd" data-typing="1">$ cat profile.md</span></div>
+<div class="tb-right"></div>
+</div>
+<div class="content" id="about"></div>
+</section>
+<section class="win lens" data-clickfx="pulse" data-label="lens" data-win="lens" style="--x: 512px; --y: 52px; --w: 650px;">
+<div class="titlebar">
+<div class="tb-left"></div>
+<div class="tb-title"><span class="cmd" data-typing="1">$ lens </span></div>
+<div class="tb-right"><span class="muted">hover to perturb</span></div>
+</div>
+<div class="content">
+<div class="lensWrap">
+<canvas id="lensCanvas"></canvas>
+<div class="lensHUD">
+<div aria-label="Lens modes" class="lensModes">
+<button class="lensBtn is-active" data-lens-mode="trajectories">Trajectory</button>
+<button class="lensBtn" data-lens-mode="clusters">Cluster</button>
+</div>
+</div>
+</div>
+
+<!-- Research meaning (one sentence) lives with the Lens, not a separate window. -->
+<div class="lensMeta" aria-label="Lens research summary">
+  <div class="lensQuestion" id="lensQuestion"></div>
+  <div class="lensPaper muted" id="lensPaper"></div>
+</div>
+</div>
+</section>
+
+<section class="win" data-clickfx="jitter" data-label="updates.log" data-win="updates" style="--x: 512px; --y: 540px; --w: 650px;">
+<div class="titlebar">
+<div class="tb-left"></div>
+<div class="tb-title"><span class="cmd" data-typing="1">$ tail -n 6 updates.log</span></div>
+<div class="tb-right"></div>
+</div>
+<div class="content" id="updates"></div>
+</section>
+
+<div class="muted" id="fatal" style="position:absolute; left:52px; top:14px; font-family:var(--mono); font-size:12px;"></div>
+</main>
+<footer class="footer">
+  <div>95% designed by Xiang Li, with reference to <a href="https://www.nanjiangwill.com/" target="_blank" rel="noopener">nanjiang</a>.</div>
+  <div>© Xiang Li. All rights reserved.</div>
+</footer>
+</div>
+<nav aria-label="Site dock" class="dock" id="dock"></nav>
+<script src="assets/js/site.js" type="module"></script>
+</body>
+</html>

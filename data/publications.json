@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Study on the optimization of emergency medical staff regional dispatch considering the ratio of doctors and nurses",
+    "authors": "Li Luo, Yiting Luo, Yuyu Geng, Xiang Li, Yuanchen Fang, and Yipeng Yang",
+    "venue": "ISAIMS",
+    "year": 2022,
+    "type": "conference",
+    "selected": true,
+    "links": {
+      "url": "",
+      "pdf": "",
+      "doi": "",
+      "code": ""
+    },
+    "media": {
+      "type": "img",
+      "src": "assets/media/nurse.png",
+      "alt": "Residual Trajectory Manifolds (example figure)"
+    },
+    "abstract": "Optimization of regional dispatch strategies under doctor–nurse ratio constraints.",
+    "bibtex": "@inproceedings{li2022dispatch,\n  title={Study on the optimization of emergency medical staff regional dispatch considering the ratio of doctors and nurses},\n  author={Luo, Li and Luo, Yiting and Geng, Yuyu and Li, Xiang and Fang, Yuanchen and Yang, Yipeng},\n  booktitle={ISAIMS},\n  year={2022}\n}"
+  }
+]
