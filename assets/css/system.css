@@ -256,25 +256,7 @@ kbd{
   pointer-events:none;
 }
 
-/* tiny easter-egg: pixel cat peeks on hover (only where enabled) */
-.win[data-cat="peek"]::after{
-  content:"";
-  position:absolute;
-  width:56px;
-  height:42px;
-  right:14px;
-  bottom:0px;
-  background: url("../img/cat_neutral.svg") no-repeat center/contain;
-  image-rendering: pixelated;
-  opacity:0;
-  transform: translateY(70%);
-  transition: transform .18s ease, opacity .18s ease;
-  pointer-events:none;
-}
-.win[data-cat="peek"]:hover::after{
-  opacity:1;
-  transform: translateY(0%);
-}
+/* Cat peek animation disabled */
 
 
 .win:hover{box-shadow: var(--shadow2)}

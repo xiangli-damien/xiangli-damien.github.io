@@ -220,9 +220,15 @@ async function init(){
     if(page==="projects") await initProjects(BASE);
     if(page==="misc") await initMisc(BASE);
   }catch(err){
-    console.error(err);
+    console.error("Page initialization error:", err);
+    console.error("BASE path:", BASE);
+    console.error("Current URL:", location.href);
     const fallback = qs("#fatal");
-    if(fallback) fallback.textContent = "Failed to load data. Please refresh.";
+    if(fallback){
+      fallback.textContent = `Failed to load data. Error: ${err.message || err}. BASE: ${BASE}`;
+      fallback.style.color = "var(--muted)";
+      fallback.style.fontSize = "11px";
+    }
   }
 }
 
