@@ -3,35 +3,24 @@ export function basePath(){
   // For user site (username.github.io), always return "/"
   // For project site (username.github.io/repo/), return "/repo/"
   
-  // Check if it's a user site by checking hostname pattern
-  // username.github.io -> user site (base "/")
-  // username.github.io/repo/ -> project site (base "/repo/")
-  
   if(location.hostname.endsWith("github.io")){
     const pathParts = location.pathname.split("/").filter(Boolean);
     
     // Empty path -> user site
     if(pathParts.length === 0) return "/";
     
-    // Known page directories -> user site
+    // Known page directories -> user site (these are our pages)
     const knownPages = new Set(["pubs","blog","misc","projects","assets","data","serverless"]);
     if(knownPages.has(pathParts[0])) return "/";
     
     // index.html or 404.html -> user site
     if(pathParts[0] === "index.html" || pathParts[0] === "404.html") return "/";
     
-    // For user sites, if we're in a subdirectory, still return "/"
-    // Only treat as project site if the first segment is NOT a known page
-    // Since we already checked knownPages above, this should be rare
-    // But to be safe, check if hostname matches user site pattern
-    const hostParts = location.hostname.split(".");
-    if(hostParts.length >= 3 && hostParts[hostParts.length - 2] === "github" && hostParts[hostParts.length - 1] === "io") {
-      // This is username.github.io format -> user site
-      return "/";
-    }
-    
-    // Fallback: assume project site
-    return "/" + pathParts[0] + "/";
+    // For xiangli-damien.github.io, it's a user site, always return "/"
+    // Only project sites would have a different first segment
+    // Since we've checked all known pages above, any remaining first segment
+    // would be a project repo name, but for user sites we want "/"
+    return "/";
   }
   
   // Local development

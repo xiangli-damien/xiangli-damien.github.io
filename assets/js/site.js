@@ -14,13 +14,16 @@ function stripTrailing(p){
 }
 function isActive(path){
   const cur = stripTrailing(location.pathname);
-  // For user site, BASE is "/", so BASE + path should be just path
-  const targetPath = path === "" ? "/" : "/" + path.replace(/^\/+|\/+$/g, "");
-  const target = stripTrailing(targetPath);
-  if(path === "") return cur === "/" || cur === "";
-  // Remove BASE prefix if present, then compare
-  const curWithoutBase = cur.startsWith(BASE) ? cur.slice(BASE.length) : cur;
-  return curWithoutBase.startsWith(target) || cur === target;
+  // Normalize path
+  const normalizedPath = path === "" ? "/" : "/" + path.replace(/^\/+|\/+$/g, "");
+  const target = stripTrailing(normalizedPath);
+  
+  if(path === "") {
+    return cur === "/" || cur === "";
+  }
+  
+  // Compare current path with target path
+  return cur === target || cur.startsWith(target + "/");
 }
 
 function applyTheme(theme){
@@ -87,11 +90,11 @@ function buildDock(wm){
 
     <div class="dockRow dockApps" aria-label="Navigation">
       ${items.map(it => {
-        // Ensure href starts with / and BASE ends with /
+        // For user site (BASE === "/"), href should be "/path/"
+        // Ensure href always starts with /
         const cleanHref = it.href.startsWith("/") ? it.href : "/" + it.href;
-        const fullHref = BASE === "/" ? cleanHref : BASE.replace(/\/$/, "") + cleanHref;
         return `
-        <a data-tip="${it.label}" href="${fullHref}" class="dockApp ${isActive(it.href) ? "is-active" : ""}">
+        <a data-tip="${it.label}" href="${cleanHref}" class="dockApp ${isActive(it.href) ? "is-active" : ""}">
           ${it.label}
         </a>
       `;
