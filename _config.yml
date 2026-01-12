@@ -1,0 +1,3 @@
+# Disable Jekyll processing for GitHub Pages
+# This ensures static files are served directly
+plugins: []

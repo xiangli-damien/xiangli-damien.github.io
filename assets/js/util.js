@@ -4,13 +4,18 @@ export function basePath(){
   // - project site: https://username.github.io/repo/ -> base "/repo/"
   if(location.hostname.endsWith("github.io")){
     const parts = location.pathname.split("/").filter(Boolean);
-    const known = new Set(["pubs","blog","misc","projects","assets","data","serverless","index.html","404.html"]);
+    const knownPages = new Set(["pubs","blog","misc","projects","assets","data","serverless"]);
+    
+    // Empty path or root -> user site
     if(parts.length === 0) return "/";
-    if(known.has(parts[0])) return "/";
-    // For user site (username.github.io), return "/"
-    // Check if it's a user site by checking if path starts with known pages
-    if(parts.length > 0 && known.has(parts[0])) return "/";
-    // project repo is first segment
+    
+    // If first part is a known page, it's a user site
+    if(knownPages.has(parts[0])) return "/";
+    
+    // If first part is index.html or 404.html, it's root
+    if(parts[0] === "index.html" || parts[0] === "404.html") return "/";
+    
+    // Otherwise, assume it's a project site
     return "/" + parts[0] + "/";
   }
   // Local development
