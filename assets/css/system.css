@@ -169,6 +169,7 @@ html[data-fx="crt"] body::after{
 
 *{box-sizing:border-box}
 html,body{height:100%}
+
 body{
   margin:0;
   color:var(--ink);
@@ -182,6 +183,8 @@ body{
   overflow-x:hidden;
   font-size:14px;
   line-height:1.55;
+  position:relative;
+  z-index:1;
 }
 
 input,select,textarea,button{font-family:var(--mono); font-variant-ligatures:none;}
