@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html data-fx="clean" data-theme="light" lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -9,19 +8,23 @@
 <title>Projects • Xiang Li</title>
 </head>
 <body data-page="projects">
-<div class="page">
-<main aria-label="Projects desktop" class="mainWrap">
-<section class="win" data-clickfx="wobble" data-label="projects" data-win="projects" style="--x: 60px; --y: 30px; --w: 1100px;">
-<div class="titlebar">
-<div class="tb-left"></div>
-<div class="tb-title"><span class="cmd" data-typing="1">$ ls projects/</span></div>
-<div class="tb-right"><a class="muted" href="../" style="text-decoration:none; font-family:var(--mono)">cd ..</a></div>
-</div>
-<div class="content">
-<div id="projList"></div>
-</div>
+<div class="page page-content">
+<main class="contentPage" aria-label="Projects">
+<header class="pageHero">
+  <div class="breadcrumb"><a href="../">Home</a> / <span data-typing="1">Projects</span></div>
+  <div class="pageKicker">Selected Projects</div>
+  <h1><span class="cmd" data-typing="1">Projects</span></h1>
+  <p class="pageLead">Research work and personal projects.</p>
+</header>
+<section class="sectionCard toolbarCard">
+  <div class="filterGrid">
+    <div><label for="projectQuery">Search</label><input id="projectQuery" placeholder="title / keyword / tag" type="text"/></div>
+    <div><label for="projectTag">Tag</label><select id="projectTag"></select></div>
+    <div><label for="projectYear">Year</label><select id="projectYear"></select></div>
+  </div>
 </section>
-<div class="muted" id="fatal" style="position:absolute; left:38px; top:12px; font-family:var(--mono); font-size:12px;"></div>
+<section class="projectGrid" id="projectGrid"></section>
+<div class="muted" id="fatal"></div>
 </main>
 </div>
 <nav aria-label="Site dock" class="dock" id="dock"></nav>

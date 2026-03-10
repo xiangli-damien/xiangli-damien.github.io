@@ -10,6 +10,7 @@
 *.swo
 *~
 
+
 # Logs
 *.log
 npm-debug.log*
@@ -27,3 +28,6 @@ npm-debug.log*
 # Build outputs (if any)
 dist/
 build/
+
+# Python
+__pycache__/

@@ -1,73 +1,66 @@
-import { qs, qsa, loadJSON } from "./util.js";
-import { mdToHtml } from "./md.js";
+import { qs, loadJSON } from "./util.js";
 
 export async function initMisc(BASE){
-  const cv = await loadJSON(`${BASE}data/cv.json`);
-  const profile = await loadJSON(`${BASE}data/profile.json`);
+  const [cv, profile] = await Promise.all([
+    loadJSON(`${BASE}data/cv.json`).catch(()=>({})),
+    loadJSON(`${BASE}data/profile.json`).catch(()=>({})),
+  ]);
 
-  // CV highlights
-  const cvBox = qs("#cvBox");
-  if(cvBox){
-    cvBox.innerHTML = `
-      <div class="pubItem">
-        <div class="pubTitle">Education</div>
-        <div class="pubMeta">
-          <ul>
-            ${cv.education.map(e=>`<li><strong>${e.where}</strong> — ${e.what} <span class="muted">(${e.when})</span></li>`).join("")}
-          </ul>
-        </div>
-      </div>
+  const download = qs('#cvDownload');
+  if(download) download.href = `${BASE}${profile.links?.cv||''}`;
 
-      <div class="pubItem">
-        <div class="pubTitle">Research</div>
-        <div class="pubMeta">
-          ${cv.experience.map(x=>`
-            <div style="margin:16px 0 0">
-              <div><strong>${x.title}</strong></div>
-              ${x.subtitle ? `<div class="muted" style="font-size:13px; margin-top:2px;">${x.subtitle}</div>` : ""}
-              <div class="muted" style="font-size:12px; margin-top:2px;">${x.when} ${x.where ? `| ${x.where}` : ""}</div>
-              <ul style="margin-top:8px;">${x.bullets.map(b=>`<li style="margin:4px 0;">${b}</li>`).join("")}</ul>
-            </div>
-          `).join("")}
-        </div>
-      </div>
+  const education = qs('#cvEducation');
+  if(education){
+    const items = cv.education || [];
+    education.innerHTML = items.length ? items.map(e=>`
+      <article class="listCard">
+        <h3>${(e.where||'').replace(/</g,'&lt;')}</h3>
+        <div class="entryMeta">${(e.what||'').replace(/</g,'&lt;')}</div>
+        <div class="muted">${(e.when||'')}${e.where2 ? ` • ${e.where2}` : ''}</div>
+      </article>
+    `).join('') : `<p class="muted">No education items.</p>`;
+  }
 
-      <div class="pubItem">
-        <div class="pubTitle">Teaching Experience</div>
-        <div class="pubMeta">
-          <ul>
-            ${(cv.teaching || []).map(t=>`<li><strong>${t.title}</strong> <span class="muted">(${t.when})</span></li>`).join("")}
-          </ul>
-        </div>
-      </div>
+  const experience = qs('#cvExperience');
+  if(experience){
+    const items = cv.experience || [];
+    experience.innerHTML = items.length ? items.map(x=>`
+      <article class="listCard">
+        <h3>${(x.title||'').replace(/</g,'&lt;')}</h3>
+        ${x.subtitle ? `<div class="muted" style="font-size:13px; margin-top:2px;">${(x.subtitle||'').replace(/</g,'&lt;')}</div>` : ''}
+        <div class="muted">${(x.when||'')}${x.where ? ` • ${x.where}` : ''}</div>
+        <ul>${(x.bullets||[]).map(b=>`<li>${(b||'').replace(/</g,'&lt;')}</li>`).join('')}</ul>
+      </article>
+    `).join('') : `<p class="muted">No experience items.</p>`;
+  }
 
-      <div class="pubItem">
-        <div class="pubTitle">Honors & Awards</div>
-        <div class="pubMeta">
-          <ul>
-            ${(cv.honors || []).map(h=>`<li><strong>${h.title}</strong> <span class="muted">(${h.when})</span></li>`).join("")}
-          </ul>
-        </div>
-      </div>
+  const teaching = qs('#cvTeaching');
+  if(teaching){
+    const items = cv.teaching || [];
+    teaching.innerHTML = items.length ? items.map(t=>`
+      <article class="listCard compact">
+        <h3>${(t.title||'').replace(/</g,'&lt;')}</h3>
+        <div class="muted">${t.when||''}</div>
+      </article>
+    `).join('') : `<p class="muted">No teaching items.</p>`;
+  }
 
-      <div class="pubItem">
-        <div class="pubTitle">Skills</div>
-        <div class="pubMeta">
-          <div class="kvs">
-            ${Object.entries(cv.skills || {}).map(([k,v])=>`
-              <div class="kv"><div class="k">${k}</div><div class="v">${(v||[]).join(" • ")}</div></div>
-            `).join("")}
-          </div>
-        </div>
-      </div>
+  const honors = qs('#cvHonors');
+  if(honors){
+    const items = cv.honors || [];
+    honors.innerHTML = items.length ? items.map(h=>{
+      const title = typeof h === 'string' ? h : h.title;
+      const when = typeof h === 'object' ? h.when : '';
+      return `<article class="listCard compact"><h3>${(title||'').replace(/</g,'&lt;')}</h3><div class="muted">${when}</div></article>`;
+    }).join('') : `<p class="muted">No honors listed.</p>`;
+  }
 
-      <div class="pubItem">
-        <div class="pubTitle">Download CV</div>
-        <div class="pubLinks">
-          <a href="${BASE}${profile.links.cv}" target="_blank" rel="noopener">CV PDF</a>
-        </div>
-      </div>
-    `;
+  const skills = qs('#cvSkills');
+  if(skills){
+    const entries = Object.entries(cv.skills || {});
+    skills.innerHTML = entries.length ? entries.map(([k,v])=>`
+      <article class="skillCard"><h3>${k.replace(/</g,'&lt;')}</h3><p>${(v||[]).join(' • ')}</p></article>
+    `).join('') : `<p class="muted">No skills listed.</p>`;
   }
 
 }

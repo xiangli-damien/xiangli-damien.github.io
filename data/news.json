@@ -1,17 +1,22 @@
 [
   {
-    "date": "2026/01",
-    "text": "Our work on LLM correctness evaluation is submitted to <span style=\"color: #2b5fff;\">**ACL 2026 !**</span>",
-    "url": ""
+    "date": "2025/03",
+    "url": "",
+    "text": "**Research Intern** at Stony Brook University, advised by Prof. Jiawei Zhou"
   },
   {
     "date": "2025/09",
-    "text": "<span style=\"color: #2b5fff;\">**TA**</span>: Parallel Programming (MPCS 52060), UChicago",
-    "url": ""
+    "url": "",
+    "text": "**TA**: Parallel Programming (MPCS 52060), UChicago"
   },
   {
-    "date": "2025/03",
-    "text": "<span style=\"color: #2b5fff;\">**Research Intern**</span> at Stony Brook University, advised by Prof. Jiawei Zhou",
-    "url": ""
+    "date": "2026/01",
+    "url": "",
+    "text": "Our work on LLM correctness evaluation is submitted to **ACL 2026!**"
+  },
+  {
+    "date": "2026/03",
+    "url": "",
+    "text": "Our work on training-free framework for discretizing LLM hidden-state geometry, is submitted to **ICML 2026!**"
   }
 ]

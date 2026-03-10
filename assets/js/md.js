@@ -84,9 +84,11 @@ function inline(s){
   // inline code
   t = t.replace(/`([^`]+)`/g, (_,c)=>`<code>${escapeHtml(c)}</code>`);
 
-  // bold / italic
+  // bold / italic (**, __, *, _)
   t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  t = t.replace(/__([^_]+)__/g, "<strong>$1</strong>");
   t = t.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  t = t.replace(/_([^_]+)_/g, "<em>$1</em>");
 
   // links [text](url)
   t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_,a,href)=>`<a href="${href}" target="_blank" rel="noopener">${a}</a>`);
@@ -111,7 +113,9 @@ export function inlineMdWithHtml(s){
     processedContent = processedContent.replace(/`([^`]+)`/g, (_,c)=>`<code>${escapeHtml(c)}</code>`);
     // bold / italic
     processedContent = processedContent.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    processedContent = processedContent.replace(/__([^_]+)__/g, "<strong>$1</strong>");
     processedContent = processedContent.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    processedContent = processedContent.replace(/_([^_]+)_/g, "<em>$1</em>");
     // links
     processedContent = processedContent.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_,a,href)=>`<a href="${href}" target="_blank" rel="noopener">${a}</a>`);
     

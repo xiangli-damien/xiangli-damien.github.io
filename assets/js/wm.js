@@ -239,9 +239,14 @@ export function initWM(){
       let nx = drag.pos.x + dx;
       let ny = drag.pos.y + dy;
 
-      // keep it roughly in viewport
-      nx = clamp(nx, -40, window.innerWidth - 120);
-      ny = clamp(ny, -20, window.innerHeight - 120);
+      // Allow windows to move freely; keep ~60px visible for grabbing back
+      const keepVisible = 60;
+      const minX = -(win.offsetWidth || 400) + keepVisible;
+      const maxX = window.innerWidth - keepVisible;
+      const minY = -12;
+      const maxY = window.innerHeight - 50;
+      nx = clamp(nx, minX, maxX);
+      ny = clamp(ny, minY, maxY);
 
       setPos(win, snap(nx, 2), snap(ny, 2));
     });

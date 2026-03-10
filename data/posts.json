@@ -1,13 +1,9 @@
 [
   {
-    "slug": "discovering-geometry-in-hidden-states",
-    "title": "Discovering Geometry in Hidden States",
-    "date": "2026-01-20",
-    "tags": [
-      "interpretability",
-      "geometry",
-      "research"
-    ],
-    "summary": "What can we learn by looking at how representations move through space during inference? Exploring geometric patterns in hidden state trajectories."
+    "title": "Reading List",
+    "summary": "Curated and gradually updated reading list.",
+    "date": "2025-03-09",
+    "slug": "reading-list",
+    "media": { "src": "assets/img/readinglist.jpg", "alt": "Reading list" }
   }
 ]

@@ -53,9 +53,31 @@ export function getParam(name){
 }
 
 export function formatDateISO(iso){
-  // yyyy-mm-dd
   if(!iso) return "";
+  if(/^\d{4}\/\d{2}$/.test(iso)) return iso;
   const [y,m,d] = iso.split("-");
   if(!y) return iso;
-  return `${y}/${m}/${d}`;
+  return d ? `${y}/${m}/${d}` : `${y}/${m}`;
+}
+
+export function escapeRegExp(s){
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export async function copyText(text){
+  if(navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
+  return new Promise((resolve, reject)=>{
+    try{
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.setAttribute("readonly", "");
+      el.style.position = "absolute";
+      el.style.left = "-9999px";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      el.remove();
+      resolve();
+    }catch(err){ reject(err); }
+  });
 }

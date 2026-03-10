@@ -1,27 +1,45 @@
 <!DOCTYPE html>
-
 <html data-fx="clean" data-theme="light" lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta content="light dark" name="color-scheme"/>
 <link href="../assets/css/system.css" rel="stylesheet"/>
-<title>Misc • Xiang Li</title>
+<title>CV • Xiang Li</title>
 </head>
 <body data-page="misc">
-<div class="page">
-<main aria-label="Misc desktop" class="mainWrap">
-<section class="win" data-clickfx="wobble" data-label="cv" data-win="cv" style="--x: 60px; --y: 30px; --w: 1100px;">
-<div class="titlebar">
-<div class="tb-left"></div>
-<div class="tb-title"><span class="cmd" data-typing="1">$ cat cv.highlights</span></div>
-<div class="tb-right"><a class="muted" href="../" style="text-decoration:none; font-family:var(--mono)">cd ..</a></div>
-</div>
-<div class="content">
-<div id="cvBox"></div>
-</div>
+<div class="page page-content">
+<main class="contentPage" aria-label="CV">
+<header class="pageHero" id="miscHero">
+  <div class="breadcrumb"><a href="../">Home</a> / <span data-typing="1">CV</span></div>
+  <div class="pageKicker">CV</div>
+  <h1><span class="cmd" data-typing="1">CV</span></h1>
+  <p class="pageLead">Resume and background.</p>
+  <div class="heroActions"><a class="heroBtn" href="#" id="cvDownload" target="_blank" rel="noopener">Download CV (PDF)</a></div>
+</header>
+<section class="cvGrid">
+  <section class="sectionCard">
+    <div class="sectionHead"><h2>Education</h2></div>
+    <div class="cardStack" id="cvEducation"></div>
+  </section>
+  <section class="sectionCard wide">
+    <div class="sectionHead"><h2>Research Experience</h2></div>
+    <div class="cardStack" id="cvExperience"></div>
+  </section>
+  <section class="sectionCard">
+    <div class="sectionHead"><h2>Teaching</h2></div>
+    <div class="cardStack" id="cvTeaching"></div>
+  </section>
+  <section class="sectionCard">
+    <div class="sectionHead"><h2>Honors &amp; Awards</h2></div>
+    <div class="cardStack" id="cvHonors"></div>
+  </section>
+  <section class="sectionCard wide">
+    <div class="sectionHead"><h2>Skills</h2></div>
+    <div class="skillGrid" id="cvSkills"></div>
+  </section>
 </section>
-<div class="muted" id="fatal" style="position:absolute; left:38px; top:12px; font-family:var(--mono); font-size:12px;"></div>
+<div class="muted" id="fatal"></div>
 </main>
 </div>
 <nav aria-label="Site dock" class="dock" id="dock"></nav>
