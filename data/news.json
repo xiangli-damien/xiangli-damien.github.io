@@ -5,18 +5,8 @@
     "text": "**Research Intern** at Stony Brook University, advised by Prof. Jiawei Zhou"
   },
   {
-    "date": "2025/09",
+    "date": "2025/12",
     "url": "",
     "text": "**TA**: Parallel Programming (MPCS 52060), UChicago"
-  },
-  {
-    "date": "2026/01",
-    "url": "",
-    "text": "Our work on LLM correctness evaluation is submitted to **ACL 2026!**"
-  },
-  {
-    "date": "2026/03",
-    "url": "",
-    "text": "Our work on training-free framework for discretizing LLM hidden-state geometry, is submitted to **ICML 2026!**"
   }
 ]
