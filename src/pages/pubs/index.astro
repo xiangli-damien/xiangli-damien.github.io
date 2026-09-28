@@ -1,0 +1,273 @@
+---
+/**
+ * HALL 01 - PUBLICATIONS
+ * One entry per paper (src/content/publications/*.md), newest first, grouped by year.
+ */
+import { Image } from 'astro:assets';
+import Room from '../../layouts/Room.astro';
+import Window from '../../components/chrome/Window.astro';
+import PageHead from '../../components/chrome/PageHead.astro';
+import { HALLS, getPublications, realLink } from '../../lib/content';
+import { profile } from '../../lib/data';
+
+const hall = HALLS.pubs;
+const papers = await getPublications();
+const years = [...new Set(papers.map((paper) => paper.data.year))].sort((a, b) => b - a);
+const types = [...new Set(papers.map((paper) => paper.data.type))].sort();
+const venues = new Set(papers.map((paper) => paper.data.venue));
+
+const owner = profile.name.toLowerCase();
+const linkLabels = { url: 'Page', pdf: 'PDF', doi: 'DOI', code: 'Code' } as const;
+---
+
+<Room
+  hall="pubs"
+  title="Publications"
+  description={`Publications and preprints by ${profile.name}: abstracts, links and BibTeX.`}
+>
+  <div class="page">
+    <PageHead
+      no={hall.no}
+      title="Publications"
+      lede="Papers and preprints, newest first. Every entry carries its abstract, its links and a BibTeX record."
+    />
+
+    <Window id="catalogue" title="Catalogue" document flush class="arrive" style="--i:1">
+      <div class="toolbar" data-filter>
+        <input
+          class="input"
+          type="search"
+          placeholder="title, author, venue"
+          aria-label="Search publications"
+          data-page-search
+          data-filter-text
+        />
+        <select class="select" aria-label="Type" data-filter-type>
+          <option value="">All types</option>
+          {types.map((type) => <option value={type}>{type}</option>)}
+        </select>
+        <select class="select" aria-label="Year" data-filter-year>
+          <option value="">All years</option>
+          {years.map((year) => <option value={year}>{year}</option>)}
+        </select>
+        <button class="btn is-quiet toolbar-end" type="button" data-filter-reset>Reset</button>
+      </div>
+
+      <div data-list>
+        {
+          years.map((year) => (
+            <section data-year={year}>
+              <h2 class="group">
+                {year}
+                <span class="label">
+                  {papers.filter((paper) => paper.data.year === year).length} on file
+                </span>
+              </h2>
+              {papers
+                .filter((paper) => paper.data.year === year)
+                .map((paper) => {
+                  const links = (Object.keys(linkLabels) as (keyof typeof linkLabels)[])
+                    .map((key) => ({ label: linkLabels[key], href: paper.data.links[key] }))
+                    .filter((link) => realLink(link.href));
+                  return (
+                    <article
+                      class="entry paper"
+                      id={paper.id}
+                      data-item
+                      data-type={paper.data.type}
+                      data-year={paper.data.year}
+                      data-text={`${paper.data.title} ${paper.data.authors.join(' ')} ${paper.data.venue} ${paper.data.abstract}`.toLowerCase()}
+                    >
+                      <div class="paper-text">
+                        <p class="machine paper-venue">
+                          <span>{paper.data.venue}</span>
+                          <span>{paper.data.year}</span>
+                          <span>{paper.data.type}</span>
+                          {paper.data.status && <span>{paper.data.status}</span>}
+                        </p>
+                        <h3 class="head-2">{paper.data.title}</h3>
+                        <p class="paper-authors">
+                          {paper.data.authors.map((author, index) => (
+                            <>
+                              {index > 0 && (index === paper.data.authors.length - 1 ? ', and ' : ', ')}
+                              {author.toLowerCase() === owner ? <strong class="under">{author}</strong> : author}
+                            </>
+                          ))}
+                        </p>
+                        {paper.data.abstract && <p class="paper-abstract">{paper.data.abstract}</p>}
+                        <div class="btns paper-actions">
+                          {links.map((link) => (
+                            <a class="btn" href={link.href} target="_blank" rel="noopener">
+                              {link.label}
+                            </a>
+                          ))}
+                          {paper.data.bibtex && (
+                            <button
+                              class="btn"
+                              type="button"
+                              aria-expanded="false"
+                              aria-controls={`bib-${paper.id}`}
+                              data-bib-toggle
+                            >
+                              BibTeX
+                            </button>
+                          )}
+                        </div>
+                        {paper.data.bibtex && (
+                          <div class="paper-bib" id={`bib-${paper.id}`} hidden>
+                            <pre tabindex="0">{paper.data.bibtex.trim()}</pre>
+                            <button class="btn is-quiet" type="button" data-bib-copy>
+                              Copy
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      {paper.data.figure && (
+                        <a
+                          class="plate paper-figure"
+                          href={paper.data.figure.src}
+                          target="_blank"
+                          rel="noopener"
+                          aria-label={`Open the figure: ${paper.data.figureAlt || paper.data.title}`}
+                        >
+                          <Image
+                            src={paper.data.figure}
+                            alt={paper.data.figureAlt}
+                            widths={[280, 560]}
+                            sizes="280px"
+                            width={560}
+                          />
+                        </a>
+                      )}
+                    </article>
+                  );
+                })}
+            </section>
+          ))
+        }
+        <p class="empty typed" data-none hidden>Nothing on file matches that.</p>
+      </div>
+
+      <Fragment slot="status">
+        <span data-count aria-live="polite">
+          {papers.length} {papers.length === 1 ? 'paper' : 'papers'}
+        </span>
+        <span>
+          {venues.size} {venues.size === 1 ? 'venue' : 'venues'} · latest {years[0]}
+        </span>
+      </Fragment>
+    </Window>
+  </div>
+</Room>
+
+<style>
+  .paper {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .paper-venue {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin-bottom: 8px;
+    color: var(--ink-3);
+  }
+
+  .paper-venue span:first-child {
+    color: var(--red);
+  }
+
+  .paper-authors {
+    margin-top: 8px;
+    font-size: var(--t-typed-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .paper-authors strong {
+    color: var(--ink);
+  }
+
+  .paper-abstract {
+    margin-top: 10px;
+    max-width: var(--measure);
+    line-height: 1.55;
+  }
+
+  .paper-actions {
+    margin-top: 16px;
+  }
+
+  .paper-bib {
+    position: relative;
+    margin-top: 14px;
+    border: 1px solid var(--rule-2);
+    background: var(--paper-2);
+  }
+
+  .paper-bib pre {
+    padding: 14px 16px;
+    overflow: auto;
+    font-family: var(--f-typed);
+    font-size: var(--t-typed-sm);
+    line-height: 1.5;
+    white-space: pre;
+  }
+
+  .paper-bib .btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--bond);
+  }
+
+  .paper-figure {
+    aspect-ratio: 16 / 10;
+  }
+
+  @media (max-width: 760px) {
+    .paper {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .paper-figure {
+      order: -1;
+    }
+  }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/page';
+  import { initFilter } from '../../scripts/desk/filter';
+
+  onPage(() => {
+    if (!document.querySelector('[data-bib-toggle]')) return;
+    initFilter();
+
+    document.querySelectorAll<HTMLButtonElement>('[data-bib-toggle]').forEach((button) => {
+      const panel = document.getElementById(button.getAttribute('aria-controls') || '');
+      if (!panel) return;
+      button.addEventListener('click', () => {
+        const open = panel.hidden;
+        panel.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+        button.setAttribute('aria-pressed', String(open));
+      });
+      panel.querySelector<HTMLButtonElement>('[data-bib-copy]')?.addEventListener('click', async (event) => {
+        const copy = event.currentTarget as HTMLButtonElement;
+        const text = panel.querySelector('pre')?.textContent ?? '';
+        try {
+          await navigator.clipboard.writeText(text);
+          copy.textContent = 'Copied';
+        } catch {
+          copy.textContent = 'Select and copy';
+        }
+        window.setTimeout(() => (copy.textContent = 'Copy'), 1600);
+      });
+    });
+  });
+</script>

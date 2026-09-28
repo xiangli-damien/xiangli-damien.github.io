@@ -1,0 +1,49 @@
+---
+/**
+ * HALL 04 - LIFE: one entry.
+ */
+import { render } from 'astro:content';
+import Reader from '../../components/read/Reader.astro';
+import { LIFE_KINDS, getLife, longDate, wordCount, type LifeEntry } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getLife();
+  return entries.map((entry, index) => ({
+    params: { slug: entry.id },
+    props: { entry, newer: entries[index - 1] ?? null, older: entries[index + 1] ?? null },
+  }));
+}
+
+interface Props {
+  entry: LifeEntry;
+  newer: LifeEntry | null;
+  older: LifeEntry | null;
+}
+
+const { entry, newer, older } = Astro.props;
+const { Content, headings } = await render(entry);
+const kind = LIFE_KINDS[entry.data.kind];
+const zh = entry.data.lang === 'zh';
+const words = wordCount(entry.body);
+const link = (other: LifeEntry | null) =>
+  other ? { href: `/life/${other.id}/`, title: other.data.listTitle ?? other.data.title } : null;
+---
+
+<Reader
+  hall="life"
+  title={entry.data.title}
+  summary={entry.data.summary}
+  lang={entry.data.lang}
+  meta={[longDate(entry.data.date), zh ? `${kind.label} ${kind.zh}` : kind.label, zh ? '中文' : 'English']}
+  tags={entry.data.tags}
+  headings={headings}
+  newer={link(newer)}
+  older={link(older)}
+  stamp={entry.data.draft ? 'Draft' : entry.data.tags.includes('template') ? 'Template' : undefined}
+  note={entry.data.note}
+  file={`${entry.data.kind}/${entry.id}`}
+  status={zh ? `${words.toLocaleString('en-US')} 字` : `${words.toLocaleString('en-US')} words`}
+  image={entry.data.cover?.src}
+>
+  <Content />
+</Reader>

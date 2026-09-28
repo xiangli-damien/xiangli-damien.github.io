@@ -1,0 +1,560 @@
+---
+/**
+ * HALL 05 - CV
+ * The curriculum vitae, typed as it would be kept in a personnel file.
+ * Entries live in src/data/cv.yaml. The name, the contact line, the research themes and the
+ * featured work come from src/data/profile.yaml; the PDF is the file named in profile.links.cv.
+ */
+import { statSync } from 'node:fs';
+import { publicDir } from 'astro:config/server';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import Room from '../../layouts/Room.astro';
+import Window from '../../components/chrome/Window.astro';
+import PageHead from '../../components/chrome/PageHead.astro';
+import Row from '../../components/cv/Row.astro';
+import Ref from '../../components/cv/Ref.astro';
+import { HALLS, realLink } from '../../lib/content';
+import { cv, profile } from '../../lib/data';
+
+const hall = HALLS.cv;
+
+/* ---------- the head of the file ---------- */
+
+const elsewhere = [
+  { label: 'Scholar', href: profile.links.scholar },
+  { label: 'GitHub', href: profile.links.github },
+  { label: 'LinkedIn', href: profile.links.linkedin },
+  { label: 'X', href: profile.links.twitter },
+].filter((link) => realLink(link.href));
+
+/* ---------- the PDF copy ---------- */
+
+const pdf = realLink(profile.links.cv) ? profile.links.cv : '';
+const pdfName = pdf.split('/').pop() ?? '';
+let pdfSize = '';
+// A copy kept on this site is weighed; the public folder is the one Astro was configured with.
+if (pdf.startsWith('/')) {
+  try {
+    pdfSize = `${Math.round(statSync(new URL(`.${pdf}`, publicDir)).size / 1024)} KB`;
+  } catch {
+    console.warn(`[cv] ${pdf} (profile.links.cv) is not in the public folder: the button leads nowhere.`);
+  }
+}
+
+/* ---------- themes ---------- */
+
+const processor = await createMarkdownProcessor({ syntaxHighlight: false });
+const themes = await Promise.all(
+  profile.researchThemes.map(async (theme) => ({
+    ...theme,
+    // the one-line answer and the details are typed as one paragraph
+    html: (await processor.render(`${theme.oneLiner} ${theme.details}`)).code,
+  })),
+);
+const featured = profile.featuredWork;
+const featuredLinks = Object.entries(featured.links).filter(([, href]) => realLink(href));
+
+/* ---------- dates ---------- */
+
+/** "Jan 2025 – Mar 2025; Sep 2025 – Present" is two periods: one line each. */
+const periods = (when: string | number) =>
+  String(when)
+    .split(/\s*;\s*/)
+    .filter(Boolean);
+const mark = (when: string | number) => (/present/i.test(String(when)) ? 'current' : 'past');
+/** "Research Assistant | Advised by ..." is typed as two remarks with a point between them. */
+const remarks = (subtitle: string) =>
+  subtitle
+    .split(/\s*\|\s*/)
+    .filter(Boolean)
+    .join(' · ');
+
+const dated = [...cv.education, ...cv.experience, ...cv.teaching, ...cv.honors];
+const current = dated.filter((item) => mark(item.when) === 'current').length;
+const skills = Object.entries(cv.skills);
+
+const sections = [
+  { id: 'themes', title: 'Themes' },
+  { id: 'education', title: 'Education' },
+  { id: 'experience', title: 'Experience' },
+  { id: 'teaching', title: 'Teaching' },
+  { id: 'honors', title: 'Honors' },
+  { id: 'skills', title: 'Skills' },
+];
+---
+
+<Room
+  hall="cv"
+  title="Curriculum vitae"
+  description={`Curriculum vitae of ${profile.name}: research themes, education, experience, teaching, honors and skills.`}
+>
+  <div class="page">
+    <PageHead no={hall.no} title="CV" lede="The record on file, and a copy of it as a PDF." />
+
+    <Window id="vitae" title="Curriculum vitae" document flush class="arrive cv" style="--i:1">
+      <div class="toolbar">
+        <nav class="cv-index machine" aria-label="Sections of the curriculum vitae">
+          {
+            sections.map((section) => (
+              <a class="plain" href={`#${section.id}`}>
+                {section.title}
+              </a>
+            ))
+          }
+        </nav>
+        {
+          pdf && (
+            <a class="btn toolbar-end cv-copy" href={pdf} target="_blank" rel="noopener">
+              Download PDF
+            </a>
+          )
+        }
+      </div>
+
+      <dl class="cv-head">
+        <Row pair label="Name" tight>
+          <p class="dots cv-name">{profile.name}</p>
+          {profile.tagline && <p class="cv-sub">{profile.tagline}</p>}
+        </Row>
+        <Row pair label="Post" tight>
+          <p>{profile.affiliation}</p>
+        </Row>
+        {
+          profile.quickFacts.map((fact) => (
+            <Row pair label={fact.k} tight>
+              <p>{fact.v}</p>
+            </Row>
+          ))
+        }
+        <Row pair label="Contact" tight>
+          <ul class="cv-contact">
+            <li>{profile.location}</li>
+            <li>
+              <a href={`mailto:${profile.email}`}>{profile.email}</a>
+            </li>
+            {
+              elsewhere.map((link) => (
+                <li>
+                  <Ref label={link.label} href={link.href} />
+                </li>
+              ))
+            }
+          </ul>
+        </Row>
+      </dl>
+
+      <section class="cv-section arrive" id="themes" aria-labelledby="themes-title" style="--i:2">
+        <h2 class="dots dots-md cv-title" id="themes-title">Themes</h2>
+        <ul class="cv-rows">
+          {
+            themes.map((theme, index) => (
+              <li>
+                <Row label={String(index + 1).padStart(2, '0')}>
+                  <h3 class="head-2">{theme.title}</h3>
+                  <p class="cv-question">{theme.question}</p>
+                  <div class="cv-note" set:html={theme.html} />
+                </Row>
+              </li>
+            ))
+          }
+          <li>
+            <Row label="Featured work">
+              <h3 class="head-2">{featured.title}</h3>
+              <p class="cv-sub">{featured.status}</p>
+              {
+                featuredLinks.length > 0 && (
+                  <div class="cv-links">
+                    <p class="label">See also</p>
+                    <ul>
+                      {featuredLinks.map(([label, href]) => (
+                        <li>
+                          <Ref label={label} href={href} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              }
+            </Row>
+          </li>
+        </ul>
+      </section>
+
+      <section class="cv-section arrive" id="education" aria-labelledby="education-title" style="--i:3">
+        <h2 class="dots dots-md cv-title" id="education-title">Education</h2>
+        <ol class="cv-rows">
+          {
+            cv.education.map((item) => (
+              <li>
+                <Row label={periods(item.when)} place={item.location} mark={mark(item.when)}>
+                  <h3 class="head-2">{item.where}</h3>
+                  <p class="cv-sub">{item.what}</p>
+                </Row>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="cv-section arrive" id="experience" aria-labelledby="experience-title" style="--i:4">
+        <h2 class="dots dots-md cv-title" id="experience-title">Research experience</h2>
+        <ol class="cv-rows">
+          {
+            cv.experience.map((item) => (
+              <li>
+                <Row label={periods(item.when)} place={item.location} mark={mark(item.when)}>
+                  <h3 class="head-2">{item.title}</h3>
+                  {item.subtitle && <p class="cv-sub">{remarks(item.subtitle)}</p>}
+                  <ul class="cv-bullets">
+                    {item.bullets.map((bullet) => (
+                      <li>{bullet}</li>
+                    ))}
+                  </ul>
+                </Row>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="cv-section arrive" id="teaching" aria-labelledby="teaching-title" style="--i:5">
+        <h2 class="dots dots-md cv-title" id="teaching-title">Teaching</h2>
+        <ol class="cv-rows">
+          {
+            cv.teaching.map((item) => (
+              <li>
+                <Row label={periods(item.when)} mark={mark(item.when)} tight>
+                  <p>{item.title}</p>
+                </Row>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="cv-section arrive" id="honors" aria-labelledby="honors-title" style="--i:6">
+        <h2 class="dots dots-md cv-title" id="honors-title">Honors and awards</h2>
+        <ol class="cv-rows">
+          {
+            cv.honors.map((item) => (
+              <li>
+                <Row label={periods(item.when)} mark={mark(item.when)} tight>
+                  <p>{item.title}</p>
+                </Row>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="cv-section arrive" id="skills" aria-labelledby="skills-title" style="--i:7">
+        <h2 class="dots dots-md cv-title" id="skills-title">Skills</h2>
+        <dl class="cv-rows">
+          {
+            skills.map(([name, items]) => (
+              <Row pair label={name} tight>
+                <p>{items.join(', ')}</p>
+              </Row>
+            ))
+          }
+        </dl>
+      </section>
+
+      <Fragment slot="status">
+        <span>
+          {dated.length} entries · {current} current
+        </span>
+        {
+          pdf && (
+            <span class="cv-file">
+              {pdfName}
+              {pdfSize && ` · ${pdfSize}`}
+            </span>
+          )
+        }
+      </Fragment>
+    </Window>
+  </div>
+</Room>
+
+<style>
+  /* one grid for the whole file: a narrow column for the machine, a wide one for the typist */
+  :global(.cv > .win-body) {
+    --cv-col: 168px;
+    --cv-gap: 36px;
+  }
+
+  /* ---------- index of sections ---------- */
+
+  .cv-index {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    color: var(--ink-3);
+  }
+
+  .cv-index a:hover {
+    color: var(--red);
+  }
+
+  /* ---------- the head of the file ---------- */
+
+  .cv-head {
+    padding: 40px 0 0;
+  }
+
+  /* the name is set as on the entrance. The dots stand a tenth of the size apart, so sizes
+     in tens of pixels (50, 40, 30, 20) put every dot on a whole pixel. */
+  .cv-name {
+    margin-left: -1px;
+    font-size: 50px;
+    letter-spacing: -0.01em;
+  }
+
+  .cv-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 22px;
+  }
+
+  /* ---------- sections ---------- */
+
+  /* Sections are set apart by air alone: the only rule on the sheet is the time line.
+     Arriving by a link to a section (the entrance does, with #experience), the title and
+     not the air above it comes to stand under the strip. */
+  .cv-section {
+    scroll-margin-top: -40px;
+  }
+
+  .cv-section:last-of-type {
+    padding-bottom: 48px;
+  }
+
+  .cv-section:target {
+    box-shadow: inset 3px 0 0 var(--red);
+  }
+
+  .cv-title {
+    padding: 64px var(--pad) 26px;
+  }
+
+  /* the air under a row separates it from the next one; the last row has no next one */
+  .cv-head > :global(.row:last-child),
+  .cv-rows > :global(.row:last-child),
+  .cv-rows > li:last-child :global(.row) {
+    padding-bottom: 0;
+  }
+
+  .cv-sub {
+    margin-top: 6px;
+    font-size: var(--t-typed-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  /* ---------- themes ---------- */
+
+  /* the question a theme asks, set as the work board at the entrance sets it */
+  .cv-question {
+    margin-top: 5px;
+    font-style: italic;
+    color: var(--ink-2);
+  }
+
+  .cv-note {
+    margin-top: 8px;
+    max-width: var(--measure);
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  .cv-links,
+  .cv-links ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 20px;
+  }
+
+  .cv-links {
+    margin-top: 10px;
+  }
+
+  /* ---------- what was done: typed with a dash in front ---------- */
+
+  .cv-bullets {
+    margin-top: 12px;
+    max-width: calc(var(--measure) + 1.2em);
+    line-height: 1.55;
+  }
+
+  .cv-bullets li {
+    position: relative;
+    padding-left: 1.2em;
+    text-wrap: pretty;
+  }
+
+  .cv-bullets li + li {
+    margin-top: 8px;
+  }
+
+  .cv-bullets li::before {
+    content: '-';
+    position: absolute;
+    left: 0;
+    color: var(--ink-3);
+  }
+
+  /* ---------- narrow ---------- */
+
+  /* the rows stand in one column from here down (see Row.astro): so does the bar.
+     The index takes a row, the button the next one, both from the left margin. */
+  @media (max-width: 800px) {
+    .cv-index {
+      flex: 1 1 100%;
+    }
+
+    .cv-copy {
+      margin-left: 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cv-head {
+      padding-top: 28px;
+    }
+
+    .cv-name {
+      font-size: 40px;
+    }
+
+    .cv-section:last-of-type {
+      padding-bottom: 36px;
+    }
+
+    .cv-title {
+      padding-top: 46px;
+      padding-bottom: 20px;
+    }
+
+    /* in a narrow column a balanced title leaves half a word alone on its first line */
+    .cv-section .head-2 {
+      font-size: var(--t-read);
+      text-wrap: wrap;
+    }
+  }
+
+  @media (max-width: 540px) {
+    /* six words that no longer fit one line stand in two rows of three */
+    .cv-index {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      justify-content: start;
+      gap: 8px 18px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    /* the longest address on file must fit a 320px screen */
+    :global(.cv > .win-body) {
+      --pad: 16px;
+    }
+
+    .cv-section {
+      scroll-margin-top: -24px;
+    }
+
+    /* the next size down of the dots (.dots-sm) */
+    .cv-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    /* the status bar has room for one read-out */
+    .cv-file {
+      display: none;
+    }
+  }
+
+  /* ---------- on paper ---------- */
+
+  @media print {
+    /* Nobody walks through paper: the strip, the hall, the colophon and the controls stay
+       behind. This sheet of styles is loaded by this page alone. */
+    :global(.strip),
+    :global(.hall),
+    :global(.skip),
+    :global(.colophon),
+    :global(.finder),
+    .toolbar {
+      display: none;
+    }
+
+    :global(html),
+    :global(body) {
+      background: none;
+    }
+
+    :global(.win.cv) {
+      box-shadow: none;
+    }
+
+    :global(.win.cv),
+    .cv-section {
+      animation: none;
+    }
+
+    .cv-head {
+      padding-top: 24px;
+    }
+
+    .cv-section {
+      box-shadow: none;
+    }
+
+    .cv-title {
+      padding-top: 40px;
+      padding-bottom: 20px;
+    }
+
+    /* a title is never left alone at the foot of a sheet, nor with its remark only */
+    .cv-title,
+    .cv-section .head-2,
+    .cv-question,
+    .cv-sub:not(:last-child) {
+      break-after: avoid;
+    }
+
+    .cv-sub,
+    .cv-question,
+    .cv-note,
+    .cv-links,
+    .cv-bullets,
+    .cv-bullets li:first-child {
+      break-before: avoid;
+    }
+
+    /* what is short is never cut in two */
+    #themes :global(.row),
+    #education :global(.row),
+    .cv-section .head-2,
+    .cv-bullets li {
+      break-inside: avoid;
+    }
+
+    .cv-contact a {
+      text-decoration: none;
+    }
+
+    /* one reference to a line, its address beside it */
+    .cv-links,
+    .cv-links ul {
+      display: block;
+    }
+
+    .cv-links li {
+      overflow-wrap: anywhere;
+    }
+  }
+</style>

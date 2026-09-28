@@ -1,0 +1,197 @@
+---
+/**
+ * The contact sheet: every portrait on file, printed small and in ink, and numbered as on
+ * the edge of a roll of film. A frame returns to its own colours when it is looked at,
+ * and opens a larger print in a window of its own (Print.astro).
+ *
+ * The pictures are in src/assets/portraits. Which of them are printed, and in what order,
+ * is set in src/data/profile.yaml: portraits.illustrations, then portraits.photo.
+ */
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Print from './Print.astro';
+import { profile } from '../../lib/data';
+
+interface Props {
+  class?: string;
+  style?: string;
+}
+
+const { class: className, style } = Astro.props;
+
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/portraits/*.{png,jpg,jpeg,webp}', {
+  eager: true,
+});
+const find = (name: string) => Object.entries(files).find(([path]) => path.endsWith(`/${name}`))?.[1].default;
+
+/**
+ * What each picture shows, for a reader who cannot see it.
+ * A picture that is not named here is still described, only less exactly.
+ */
+const SHOWS: Record<string, string> = {
+  'xiangli-bluesketch.png': 'a crayon sketch on a blue ground',
+  'xiangli-clay.png': 'a clay figure in a hooded jumper',
+  'xiangli-alien.png': 'an alien among the stars',
+  'xiangli-pearl.png': 'an oil painting, after the Girl with a Pearl Earring',
+  'xiangli-robot.png': 'a robot in a comic strip',
+  'xiangli-kongfu.png': 'a kung fu master in ink wash',
+  'xiangli-rock.png': 'a stone with two eyes, lying on sand',
+};
+
+const listed = [
+  ...profile.portraits.illustrations.map((name) => ({ name, photo: false })),
+  { name: profile.portraits.photo, photo: true },
+].filter((item) => Boolean(item.name));
+
+const SIZE = 240; // twice the size of a frame, or nearly
+const LARGE = 960; // the print in the viewer
+
+const frames = (
+  await Promise.all(
+    listed.map(async ({ name, photo }) => {
+      const source = find(name);
+      if (!source) return null;
+      const print = await getImage({ src: source, width: SIZE, height: SIZE, format: 'webp', quality: 80 });
+      const large = await getImage({ src: source, width: Math.min(source.width, LARGE), format: 'webp', quality: 86 });
+      const shows = photo
+        ? `${profile.name}, photographed`
+        : SHOWS[name]
+          ? `${profile.name} as ${SHOWS[name]}`
+          : `${profile.name}, an illustration`;
+      return {
+        print: print.src,
+        large: large.src,
+        ratio: (source.width / source.height).toFixed(4),
+        shows,
+        photo,
+      };
+    }),
+  )
+)
+  .filter((frame) => frame !== null)
+  .map((frame, index) => ({ ...frame, no: String(index + 1).padStart(2, '0') }));
+---
+
+{
+  frames.length > 0 && (
+    <>
+      <section class:list={['sheet', className]} style={style} aria-labelledby="sheet-title">
+        <div class="heading">
+          <h2 id="sheet-title">Contact sheet</h2>
+          <span class="count">
+            {frames.length} {frames.length === 1 ? 'frame' : 'frames'}
+          </span>
+        </div>
+        <ol class="sheet-strip" data-print-roll>
+          {frames.map((frame) => (
+            <li class:list={['sheet-frame', { 'is-photo': frame.photo }]}>
+              <a
+                class="plate plain"
+                href={frame.large}
+                target="_blank"
+                rel="noopener"
+                data-print={`Frame ${frame.no}`}
+                data-print-ratio={frame.ratio}
+                data-print-note={frame.photo ? 'Photograph' : 'Illustration'}
+              >
+                <img
+                  src={frame.print}
+                  alt={`Frame ${frame.no}: ${frame.shows}.`}
+                  width={SIZE}
+                  height={SIZE}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="sr-only">Open a larger print.</span>
+              </a>
+              <span class="machine sheet-no" aria-hidden="true">
+                {frame.no}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+      <Print />
+    </>
+  )
+}
+
+<style>
+  /* The name of the sheet is its heading; the count beside it is not part of the name. */
+  .heading h2 {
+    font: inherit;
+  }
+
+  /*
+   * One strip of film laid on the paper: a hairline along each edge, the frames between.
+   * The lines belong to the strip, not to the frames, so a roll of any length is ruled whole;
+   * the first and the last frame of a row stand flush with the ends of the lines.
+   */
+  .sheet-strip {
+    --top: 14px;
+    --bottom: 9px;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: calc(var(--top) + var(--bottom) + 1px) 14px;
+    padding: var(--top) 0 var(--bottom);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .sheet-frame {
+    min-width: 0;
+  }
+
+  /* A roll longer than one row is cut into strips. The frame that begins a strip rules it off. */
+  .sheet-frame:nth-child(8n + 1):not(:first-child)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-top: calc(-1 * var(--top) - 1px);
+    border-top: 1px solid var(--ink);
+  }
+
+  .sheet-frame .plate {
+    position: relative;
+    aspect-ratio: 1;
+  }
+
+  /* Several drawings carry a margin of their own paper; the print is cropped inside it. */
+  .sheet-frame:not(.is-photo) img {
+    transform: scale(1.12);
+  }
+
+  .sheet-no {
+    display: block;
+    margin-top: 8px;
+    color: var(--ink-3);
+  }
+
+  /* The frames stay small, as contact prints are: the strip is kept whole as long as it fits. */
+  @media (max-width: 899px) {
+    .sheet-strip {
+      --top: 12px;
+      --bottom: 8px;
+      column-gap: 8px;
+    }
+  }
+
+  /* Narrow paper: strips of four. */
+  @media (max-width: 559px) {
+    .sheet-strip {
+      --top: 10px;
+      --bottom: 7px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .sheet-frame:nth-child(4n + 1):not(:first-child)::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      margin-top: calc(-1 * var(--top) - 1px);
+      border-top: 1px solid var(--ink);
+    }
+  }
+</style>

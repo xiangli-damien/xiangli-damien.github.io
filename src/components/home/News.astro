@@ -1,0 +1,71 @@
+---
+/**
+ * News, newest first. Entries live in src/data/news.yaml.
+ */
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import { getNews, newsDate } from '../../lib/content';
+
+interface Props {
+  limit?: number;
+}
+const { limit = 6 } = Astro.props;
+
+const processor = await createMarkdownProcessor({ syntaxHighlight: false });
+const items = await Promise.all(
+  (await getNews()).slice(0, limit).map(async (item) => {
+    const { code } = await processor.render(item.data.text);
+    return { ...item.data, html: code.replace(/^<p>|<\/p>\s*$/g, '') };
+  }),
+);
+---
+
+<ol class="news">
+  {
+    items.map((item) => (
+      <li>
+        <time class="machine" datetime={item.date}>
+          {newsDate(item.date)}
+        </time>
+        <p class="typed">
+          {item.url ? (
+            <a href={item.url} target="_blank" rel="noopener" set:html={item.html} />
+          ) : (
+            <Fragment set:html={item.html} />
+          )}
+        </p>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .news li {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 14px;
+    padding: 9px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .news li:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .news li:last-child {
+    padding-bottom: 0;
+  }
+
+  .news time {
+    padding-top: 4px;
+    color: var(--ink-3);
+  }
+
+  .news li:first-child time {
+    color: var(--red);
+  }
+
+  .news p {
+    line-height: 1.45;
+  }
+</style>

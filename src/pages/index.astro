@@ -1,0 +1,91 @@
+---
+import Room from '../layouts/Room.astro';
+import Window from '../components/chrome/Window.astro';
+import Identity from '../components/home/Identity.astro';
+import Board from '../components/home/Board.astro';
+import News from '../components/home/News.astro';
+import { getChannels, getNews } from '../lib/content';
+import { profile } from '../lib/data';
+
+const channels = await getChannels();
+const news = await getNews();
+---
+
+<Room hall="home">
+  <h1 class="sr-only">{profile.name}, {profile.affiliation}</h1>
+  <div class="desk" data-desk="entrance">
+    <div class="col col-left">
+      <Window id="identity" title="Identity" side={-1} primary>
+        <Identity />
+      </Window>
+      <Window id="news" title="News" side={-1} status={`${news.length} entries, newest first`}>
+        <News />
+      </Window>
+    </div>
+
+    <div class="col col-right">
+      <Window id="board" title="Work board" side={1} flush>
+        <Board />
+        <Fragment slot="status">
+          <span data-board-readout>&nbsp;</span>
+          <span>{channels.length} works on file</span>
+        </Fragment>
+      </Window>
+    </div>
+  </div>
+</Room>
+
+<style>
+  .desk {
+    grid-template-columns: minmax(300px, 27vw) minmax(0, 1fr) minmax(340px, 31vw);
+    grid-template-areas: 'left . right';
+    min-height: calc(100dvh - var(--strip));
+  }
+
+  .col {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--gap);
+    align-content: start;
+    /* a column is only there to place its windows; the hall shows between them */
+    pointer-events: none;
+  }
+
+  .col > :global(*) {
+    pointer-events: auto;
+  }
+
+  .col-left {
+    grid-area: left;
+    max-width: 400px;
+  }
+
+  .col-right {
+    grid-area: right;
+    max-width: 460px;
+    justify-self: end;
+    width: 100%;
+  }
+
+  /* no room beside the hall: two columns of windows under it, then one */
+  @media (max-width: 1199px), (pointer: coarse) {
+    .desk {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: 'left right';
+      min-height: 0;
+    }
+
+    .col-left,
+    .col-right {
+      max-width: none;
+      justify-self: stretch;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .desk {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: 'left' 'right';
+    }
+  }
+</style>

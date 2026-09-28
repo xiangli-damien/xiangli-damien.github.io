@@ -1,0 +1,634 @@
+---
+/**
+ * HALL 04 - LIFE
+ * What is not strictly academic. This hall takes the place of the old Misc page;
+ * the CV, which was part of that page, is hall 05.
+ *
+ *   entries                  src/content/life/*.md, newest first, grouped by year
+ *   caption, links, notes    src/data/life.yaml
+ *   motto, CV and profiles   src/data/profile.yaml
+ *   portraits                src/components/life/ContactSheet.astro
+ *
+ * A control is printed only when it has something to do: the bar of filters asks for two
+ * entries, each of its selects for two choices.
+ */
+import { Image } from 'astro:assets';
+import Room from '../../layouts/Room.astro';
+import Window from '../../components/chrome/Window.astro';
+import PageHead from '../../components/chrome/PageHead.astro';
+import ContactSheet from '../../components/life/ContactSheet.astro';
+import {
+  HALLS,
+  LIFE_KINDS,
+  LIFE_LANGUAGES,
+  dayMonth,
+  getLife,
+  isoDate,
+  lifeFlag,
+  realLink,
+  stampDate,
+} from '../../lib/content';
+import { lifeMeta, profile } from '../../lib/data';
+
+type Kind = keyof typeof LIFE_KINDS;
+type Language = keyof typeof LIFE_LANGUAGES;
+
+const hall = HALLS.life;
+
+/* ---------- the entries ---------- */
+
+const entries = (await getLife()).map((entry) => {
+  const { data } = entry;
+  const kind = LIFE_KINDS[data.kind];
+  const flag = lifeFlag(entry);
+  return {
+    id: entry.id,
+    href: `${hall.href}${entry.id}/`,
+    data,
+    year: data.date.getUTCFullYear(),
+    title: data.listTitle ?? data.title,
+    kind,
+    flag,
+    // the stamp already says it
+    tags: data.tags.filter((tag) => tag.toLowerCase() !== flag.toLowerCase()),
+    text: [
+      data.title,
+      data.listTitle,
+      data.summary,
+      kind.label,
+      kind.zh,
+      LIFE_LANGUAGES[data.lang],
+      ...data.tags,
+      isoDate(data.date),
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase(),
+  };
+});
+
+const years = [...new Set(entries.map((entry) => entry.year))].sort((a, b) => b - a);
+const kinds = (Object.keys(LIFE_KINDS) as Kind[])
+  .map((key) => ({ key, ...LIFE_KINDS[key], count: entries.filter((entry) => entry.data.kind === key).length }))
+  .filter((kind) => kind.count > 0);
+const languages = (Object.keys(LIFE_LANGUAGES) as Language[]).filter((key) =>
+  entries.some((entry) => entry.data.lang === key),
+);
+
+const filters = entries.length > 1;
+const byKind = kinds.length > 1;
+const byLanguage = languages.length > 1;
+
+// The old page named this list "Chinese essays / 杂文". The name stands for as long as it is true.
+const chineseEssays = entries.every((entry) => entry.data.kind === 'essay' && entry.data.lang === 'zh');
+
+/* ---------- quick links ---------- */
+
+// The CV is on file in hall 05; the copy of it that the old page offered for download is kept here.
+const cvCopy = realLink(profile.links.cv) ? profile.links.cv : '';
+
+// The owner's profiles, named and described as the old page did.
+const PROFILES = {
+  github: { label: 'GitHub', note: 'Code repositories, experiments, and tooling.' },
+  scholar: { label: 'Google Scholar', note: 'Publication list and citation profile.' },
+  linkedin: { label: 'LinkedIn', note: 'Professional timeline and profile.' },
+  twitter: { label: 'X / Twitter', note: 'Short-form updates and public notes.' },
+} as const;
+
+const leaves = (href: string) => /^https?:\/\//i.test(href);
+
+// The rule of the old page: the links named in life.yaml and, only when none is named, the profiles.
+const named = lifeMeta.quickLinks.map((link) => ({ label: link.label, href: link.href, note: link.note ?? '' }));
+const profiles = (Object.keys(PROFILES) as (keyof typeof PROFILES)[]).map((key) => ({
+  ...PROFILES[key],
+  href: profile.links[key],
+}));
+const quickLinks = (named.length > 0 ? named : profiles)
+  .filter((link) => realLink(link.href))
+  .map((link) => ({ ...link, leaves: leaves(link.href) }));
+---
+
+<Room hall="life" title="Life" description={`${hall.title}. ${lifeMeta.intro}`}>
+  <div class="page">
+    <PageHead no={hall.no} title="Life" lede={profile.motto}>
+      <p class="page-meta">
+        <span>Archive &amp; side writing</span>
+        <span>Formerly Misc</span>
+      </p>
+    </PageHead>
+
+    <ContactSheet class="arrive life-sheet" style="--i:1" />
+
+    <div class="page-grid has-side">
+      <Window id="register" title="Register" document flush class="arrive" style="--i:2">
+        <p class="caption">
+          {
+            chineseEssays && (
+              <span class="machine caption-name">
+                <span>Chinese essays</span>
+                <span lang="zh">杂文</span>
+              </span>
+            )
+          }
+          <span class="caption-text">{lifeMeta.intro}</span>
+        </p>
+
+        {
+          filters && (
+            <div class:list={['toolbar', { 'is-full': byKind && byLanguage }]} data-filter>
+              <input
+                class="input"
+                type="search"
+                placeholder="title, summary, tag"
+                aria-label="Search the register"
+                data-page-search
+                data-filter-text
+              />
+              {byKind && (
+                <select class="select" aria-label="Kind" data-filter-kind>
+                  <option value="">All kinds</option>
+                  {kinds.map((kind) => (
+                    <option value={kind.key}>{kind.label}</option>
+                  ))}
+                </select>
+              )}
+              {byLanguage && (
+                <select class="select select-lang" aria-label="Language" data-filter-lang>
+                  <option value="">All languages</option>
+                  {languages.map((key) => (
+                    <option value={key} lang={key}>
+                      {LIFE_LANGUAGES[key]}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <button class="btn is-quiet toolbar-end" type="button" data-filter-reset>
+                Reset
+              </button>
+            </div>
+          )
+        }
+
+        <div data-list>
+          {
+            years.map((year) => (
+              <section data-year={year}>
+                <h2 class="group">
+                  {year}{' '}
+                  <span class="label">{entries.filter((entry) => entry.year === year).length} on file</span>
+                </h2>
+                {entries
+                  .filter((entry) => entry.year === year)
+                  .map((entry) => (
+                    <article
+                      class:list={['entry item', { 'has-cover': entry.data.cover }]}
+                      id={entry.id}
+                      data-item
+                      data-kind={entry.data.kind}
+                      data-lang={entry.data.lang}
+                      data-text={entry.text}
+                    >
+                      <p class="machine item-index">
+                        <time datetime={isoDate(entry.data.date)}>{dayMonth(entry.data.date)}</time>
+                        <span class="item-kind">
+                          <span>{entry.kind.label}</span>
+                          {entry.data.lang === 'zh' && <span lang="zh">{entry.kind.zh}</span>}
+                        </span>
+                      </p>
+                      <div class="item-text">
+                        <div class="item-head">
+                          <h3 class="head-2 item-title">
+                            <a class="plain" href={entry.href} lang={entry.data.lang}>
+                              {entry.title}
+                            </a>
+                          </h3>
+                          {entry.flag && <span class="stamp item-stamp">{entry.flag}</span>}
+                        </div>
+                        {entry.data.summary && (
+                          <p class="item-summary" lang={entry.data.lang}>
+                            {entry.data.summary}
+                          </p>
+                        )}
+                        {entry.tags.length > 0 && (
+                          <p class="machine item-tags">
+                            {entry.tags.map((tag) => (
+                              <span>#{tag}</span>
+                            ))}
+                          </p>
+                        )}
+                      </div>
+                      {entry.data.cover && (
+                        <a class="plate item-cover" href={entry.href} tabindex="-1">
+                          <Image
+                            src={entry.data.cover}
+                            alt={entry.data.coverAlt || entry.title}
+                            widths={[168, 336]}
+                            sizes="168px"
+                            width={336}
+                          />
+                        </a>
+                      )}
+                    </article>
+                  ))}
+              </section>
+            ))
+          }
+          {
+            entries.length === 0 && (
+              <div class="entry item">
+                <p class="machine item-index">Nothing on file</p>
+                <div class="item-text">
+                  <p class="head-2 item-title">
+                    Reserved / <span lang="zh">留白</span>
+                  </p>
+                  <p class="item-summary">
+                    This space is intentionally separated from the main blog so Chinese essays, side notes, or
+                    personal reflections can grow without diluting the academic archive.
+                  </p>
+                </div>
+              </div>
+            )
+          }
+          {
+            filters && (
+              <p class="empty typed" data-none hidden>
+                Nothing on file matches that.
+              </p>
+            )
+          }
+        </div>
+
+        <Fragment slot="status">
+          <span data-count aria-live="polite">
+            {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+          </span>
+          {
+            entries.length > 0 && (
+              <span>
+                {byKind && (
+                  <span class="status-kinds">
+                    {kinds.map((kind) => `${kind.label} ${kind.count}`).join(' · ')} ·{' '}
+                  </span>
+                )}
+                latest {stampDate(entries[0].data.date)}
+              </span>
+            )
+          }
+        </Fragment>
+      </Window>
+
+      <aside class="life-margin arrive" style="--i:3" aria-labelledby="links-title">
+        <div class="heading">
+          <h2 id="links-title">Quick links</h2>
+        </div>
+        <p class="margin-caption">Documents, profiles, and external destinations.</p>
+        <ul class="links">
+          <li>
+            <p class="link-head">
+              <a href={HALLS.cv.href}>CV / Résumé</a>
+              <span class="machine link-mark">Internal · hall {HALLS.cv.no}</span>
+            </p>
+            <p>PDF résumé and academic background.</p>
+            {
+              cvCopy && (
+                <a class="btn link-copy" href={cvCopy} download>
+                  Download CV (PDF)
+                </a>
+              )
+            }
+          </li>
+          {
+            quickLinks.map((link) => (
+              <li>
+                <p class="link-head">
+                  <a
+                    href={link.href}
+                    target={link.leaves ? '_blank' : undefined}
+                    rel={link.leaves ? 'noopener' : undefined}
+                  >
+                    {link.label}
+                  </a>
+                  <span class="machine link-mark">{link.leaves ? 'External' : 'Internal'}</span>
+                </p>
+                {link.note && <p>{link.note}</p>}
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+    </div>
+
+    <section class="life-notes arrive" style="--i:4" aria-labelledby="notes-title">
+      <div class="heading">
+        <h2 id="notes-title">Section notes</h2>
+        <span class="count">Written for Misc</span>
+      </div>
+      <div class="notes">
+        {
+          lifeMeta.notes.map((note) => (
+            <div class="note">
+              <h3 class="label">{note.title}</h3>
+              <p>{note.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</Room>
+
+<style>
+  /* The name of a part is its heading; what stands beside it is not part of the name. */
+  .heading h2 {
+    font: inherit;
+  }
+
+  /* ---------- the contact sheet stands alone on the paper ---------- */
+
+  :global(.life-sheet) {
+    margin: 6px 0 60px;
+  }
+
+  /* ---------- the register: what the machine filed on the left, what was written on the right ---------- */
+
+  .caption,
+  .item {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    column-gap: 20px;
+    align-items: start;
+  }
+
+  .item.has-cover {
+    grid-template-columns: 112px minmax(0, 1fr) 168px;
+  }
+
+  .caption {
+    padding: 13px var(--pad) 12px;
+    border-bottom: 1px solid var(--rule-2);
+    font-size: var(--t-typed-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .caption-name,
+  .item-kind {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 3px 8px;
+  }
+
+  .caption-name {
+    padding-top: 2px;
+    color: var(--ink);
+  }
+
+  .caption-name span,
+  .item-kind span {
+    white-space: nowrap;
+  }
+
+  .caption-text {
+    grid-column: 2;
+  }
+
+  /* The machine face has no Chinese: a Chinese word among its labels is typed. */
+  .machine :lang(zh) {
+    font-family: var(--f-typed);
+    font-size: var(--t-typed-sm);
+    letter-spacing: 0.04em;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /*
+   * Every year after the first one shown begins under a full line.
+   * (In page.css .group:first-child takes the line from every year, since each year is
+   * the first child of its own section. This rule puts it back until that one is mended.)
+   */
+  [data-list] section:not([hidden]) ~ section > .group {
+    border-top: 1px solid var(--ink);
+  }
+
+  .item-index {
+    display: grid;
+    gap: 6px;
+    padding-top: 6px;
+    color: var(--ink-3);
+  }
+
+  .item-index time {
+    color: var(--ink);
+  }
+
+  .item-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px 20px;
+  }
+
+  .item-title {
+    flex: 1 1 12em;
+    min-width: 0;
+  }
+
+  .item-title a:hover {
+    color: var(--red);
+  }
+
+  /*
+   * Provisional: Chinese headings in lists have no rule in the design system yet.
+   * The face is the one page.css gives to Chinese titles, which has a bold to stand
+   * beside the bold of the typewriter; the size is that of .head-2.
+   */
+  .item-title :lang(zh) {
+    font-family: 'Songti SC', 'STSong', 'Noto Serif CJK SC', 'Source Han Serif SC', 'SimSun', serif;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+
+  .item-stamp {
+    flex: none;
+    margin-top: 2px;
+  }
+
+  .item-summary {
+    margin-top: 8px;
+    max-width: var(--measure);
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  .item-summary:lang(zh) {
+    line-height: 1.75;
+    letter-spacing: 0.04em;
+  }
+
+  .item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin-top: 12px;
+    color: var(--ink-3);
+  }
+
+  .item-cover {
+    aspect-ratio: 4 / 3;
+  }
+
+  /* beside the margin the window is narrower than a full page: the controls give way */
+  .toolbar .input {
+    flex-basis: 200px;
+  }
+
+  .toolbar .select-lang {
+    flex-basis: 160px;
+  }
+
+  /* ---------- the margin: typed on the paper, beside the window ---------- */
+
+  .life-margin,
+  .life-notes {
+    font-size: var(--t-typed-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .margin-caption {
+    padding: 10px 0 4px;
+    color: var(--ink-3);
+  }
+
+  .links li {
+    padding: 14px 0 15px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .links li:first-child {
+    border-top: 0;
+  }
+
+  .link-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px 14px;
+    margin-bottom: 2px;
+  }
+
+  .link-head a {
+    font-size: var(--t-typed);
+    color: var(--ink);
+  }
+
+  .link-head a:hover {
+    color: var(--red);
+  }
+
+  /* here the word beside the link says where it leads, so the arrow is not drawn as well */
+  .link-head a[target='_blank']::after {
+    content: none;
+  }
+
+  .link-mark {
+    color: var(--ink-3);
+  }
+
+  .link-copy {
+    margin-top: 12px;
+  }
+
+  /* ---------- the notes: set at the foot of the page, as on a printed sheet ---------- */
+
+  .life-notes {
+    margin-top: 68px;
+  }
+
+  .notes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px 28px;
+    padding-top: 16px;
+  }
+
+  .note .label {
+    margin-bottom: 5px;
+  }
+
+  @media (max-width: 999px) {
+    .life-margin {
+      margin-top: 16px;
+    }
+  }
+
+  @media (max-width: 759px) {
+    .notes {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* four controls do not fit on one line here: the field takes a line of its own */
+  @media (max-width: 719px), (min-width: 1000px) and (max-width: 1059px) {
+    .toolbar.is-full .input {
+      flex-basis: 100%;
+      max-width: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    :global(.life-sheet) {
+      margin-bottom: 40px;
+    }
+
+    .life-notes {
+      margin-top: 48px;
+    }
+
+    /* the machine's column becomes a line above what was written */
+    .caption,
+    .item,
+    .item.has-cover {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 8px;
+    }
+
+    .caption-name {
+      padding-top: 0;
+    }
+
+    .caption-text {
+      grid-column: 1;
+    }
+
+    .item-index {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 14px;
+      padding-top: 0;
+    }
+
+    .item-cover {
+      width: 168px;
+      max-width: 60%;
+      margin-top: 6px;
+    }
+
+    .status-kinds {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/page';
+  import { initFilter } from '../../scripts/desk/filter';
+
+  onPage(() => {
+    if (document.querySelector('.life-sheet')) initFilter();
+  });
+</script>

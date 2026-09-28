@@ -1,0 +1,48 @@
+---
+/**
+ * A reference that leads out of the file.
+ * On a screen it is a word to follow. Paper cannot follow a link, so there the address is
+ * printed after the word: without the scheme, and broken only after a slash.
+ */
+interface Props {
+  label: string;
+  href: string;
+}
+
+const { label, href } = Astro.props;
+const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const address = href
+  .replace(/^https?:\/\//, '')
+  .replace(/\/$/, '')
+  .split('/')
+  .map(escape)
+  .join('/<wbr>');
+---
+
+<span class="ref">
+  <a href={href} target="_blank" rel="noopener">{label}</a>{' '}<span class="ref-address" set:html={address} />
+</span>
+
+<style>
+  .ref-address {
+    display: none;
+  }
+
+  @media print {
+    .ref a {
+      text-decoration: none;
+    }
+
+    /* the arrow says that a link leaves the site; on paper the address says it */
+    .ref a::after {
+      content: none;
+    }
+
+    .ref-address {
+      display: inline;
+      margin-left: 0.6em;
+      font-size: var(--t-typed-sm);
+      color: var(--ink-2);
+    }
+  }
+</style>

@@ -1,0 +1,185 @@
+---
+/**
+ * Who this is: portrait, name, post, and how to reach him.
+ * Clicking the portrait goes through the drawn portraits; resting on it shows the photograph.
+ */
+import { getImage } from 'astro:assets';
+import About from './About.astro';
+import type { ImageMetadata } from 'astro';
+import { profile } from '../../lib/data';
+import { realLink } from '../../lib/content';
+
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/portraits/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+});
+const find = (name: string) =>
+  Object.entries(files).find(([path]) => path.endsWith(`/${name}`))?.[1].default;
+
+async function small(name: string) {
+  const source = find(name);
+  if (!source) return null;
+  if (source.format === 'svg') return source.src;
+  return (await getImage({ src: source, width: 336, height: 336, format: 'webp', quality: 82 })).src;
+}
+
+const drawn = (await Promise.all(profile.portraits.illustrations.map(small))).filter(Boolean) as string[];
+const photo = await small(profile.portraits.photo);
+const first = drawn[0] ?? (await small(profile.portraits.fallback)) ?? '';
+
+const links = [
+  { label: 'Scholar', href: profile.links.scholar },
+  { label: 'GitHub', href: profile.links.github },
+  { label: 'LinkedIn', href: profile.links.linkedin },
+  { label: 'X', href: profile.links.twitter },
+  { label: 'CV', href: profile.links.cv },
+].filter((link) => realLink(link.href));
+
+const [post, place] = profile.affiliation.split(/\s*@\s*/);
+---
+
+<div class="id">
+  <div class="id-top">
+    <button
+      class="id-portrait"
+      type="button"
+      data-portrait
+      data-drawn={JSON.stringify(drawn)}
+      data-photo={photo}
+      aria-label="Portrait of Xiang Li. Press for another drawing; rest on it for the photograph."
+    >
+      <img src={first} alt="" width="92" height="92" decoding="async" draggable="false" />
+    </button>
+    <div class="id-name">
+      <p class="dots id-title">{profile.name}</p>
+      <p class="id-post">
+        {post}{place && <><br />{place}</>}
+      </p>
+    </div>
+  </div>
+
+  <dl class="form id-facts" style="--cols:2">
+    <div class="field">
+      <dt>Location</dt>
+      <dd>{profile.location}</dd>
+    </div>
+    {
+      links.length > 0 && (
+        <div class="field">
+          <dt>Elsewhere</dt>
+          <dd class="id-links">
+            {links.map((link) => (
+              <a href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel="noopener">
+                {link.label}
+              </a>
+            ))}
+          </dd>
+        </div>
+      )
+    }
+    {
+      profile.quickFacts.map((fact) => (
+        <div class="field is-wide">
+          <dt>{fact.k}</dt>
+          <dd>{fact.v.replace(/&\s*/g, '& ')}</dd>
+        </div>
+      ))
+    }
+    <div class="field is-wide">
+      <dt>Email</dt>
+      <dd><a href={`mailto:${profile.email}`}>{profile.email}</a></dd>
+    </div>
+  </dl>
+
+  <hr class="rule id-rule" />
+  <About />
+</div>
+
+<style>
+  .id-top {
+    display: flex;
+    gap: 18px;
+    align-items: flex-end;
+    margin-bottom: 16px;
+  }
+
+  .id-rule {
+    margin: 18px 0 16px;
+  }
+
+  .id-portrait {
+    flex: none;
+    width: 92px;
+    height: 92px;
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .id-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* one palette: the portraits are shown in ink until someone looks closely */
+    filter: grayscale(1) contrast(1.06);
+  }
+
+  .id-portrait:hover img,
+  .id-portrait:focus-visible img {
+    filter: none;
+  }
+
+  .id-name {
+    min-width: 0;
+  }
+
+  .id-title {
+    margin: 0 0 7px -1px;
+    font-size: clamp(34px, 3.1vw, 44px);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .id-post {
+    font-size: var(--t-typed-sm);
+    line-height: 1.35;
+    color: var(--ink-2);
+  }
+
+  .id-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+  }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/page';
+
+  onPage(() => {
+    const button = document.querySelector<HTMLButtonElement>('[data-portrait]');
+    const image = button?.querySelector('img');
+    if (!button || !image) return;
+    const drawn: string[] = JSON.parse(button.dataset.drawn || '[]');
+    const photo = button.dataset.photo;
+    let index = 0;
+    const show = (src: string | undefined) => {
+      if (src) image.src = src;
+    };
+    button.addEventListener('click', () => {
+      if (!drawn.length) return;
+      index = (index + 1) % drawn.length;
+      show(drawn[index]);
+    });
+    if (photo) {
+      button.addEventListener('pointerenter', (event) => {
+        if (event.pointerType === 'mouse') show(photo);
+      });
+      button.addEventListener('pointerleave', () => show(drawn[index]));
+      // Fetch the other pictures once the page is idle, so the swap is instant.
+      const warm = () => [photo, ...drawn].forEach((src) => (new Image().src = src));
+      'requestIdleCallback' in window ? requestIdleCallback(warm) : setTimeout(warm, 1200);
+    }
+  });
+</script>

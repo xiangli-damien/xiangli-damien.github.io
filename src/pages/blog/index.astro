@@ -1,0 +1,766 @@
+---
+/**
+ * HALL 02 - NOTES
+ * The index of the public notebook. One row per note (src/content/notes/<category>/*.md),
+ * newest first, grouped by year. The four categories are named in src/lib/content.ts.
+ */
+import { Image } from 'astro:assets';
+import Room from '../../layouts/Room.astro';
+import Window from '../../components/chrome/Window.astro';
+import PageHead from '../../components/chrome/PageHead.astro';
+import {
+  CATEGORIES,
+  CATEGORY_KEYS,
+  HALLS,
+  dayMonth,
+  getNotes,
+  isoDate,
+  longDate,
+  readingMinutes,
+} from '../../lib/content';
+import { profile } from '../../lib/data';
+
+const hall = HALLS.blog;
+const notes = await getNotes();
+
+const yearOf = (date: Date) => date.getUTCFullYear();
+const years = [...new Set(notes.map((note) => yearOf(note.data.date)))].sort((a, b) => b - a);
+const tags = [...new Set(notes.flatMap((note) => note.data.tags))].sort((a, b) => a.localeCompare(b));
+const filed = (key: string) => notes.filter((note) => note.data.category === key).length;
+const latest = notes[0];
+
+const LANGUAGES = { en: { code: 'EN', name: 'English' }, zh: { code: 'ZH', name: 'Chinese' } } as const;
+---
+
+<Room
+  hall="blog"
+  title="Notes"
+  description={`The notebook of ${profile.name}: course notes, reading notes, paper notes and field notes.`}
+>
+  <div class="page">
+    <PageHead
+      no={hall.no}
+      title="Notes"
+      lede="Longer technical notes, research reflections and reading-oriented writing, newest first. The notebook stays research-facing."
+    >
+      <div class="page-meta">
+        <span>Research writing</span>
+        {
+          // the directory: a year is one step away, with or without the filter
+          years.length > 1 && (
+            <nav class="jumps" aria-label="Years" data-jumps>
+              {years.map((year) => (
+                <a href={`#y${year}`} data-jump={year}>
+                  {year}
+                </a>
+              ))}
+            </nav>
+          )
+        }
+      </div>
+    </PageHead>
+
+    <Window id="notebook" title="Notebook" document flush class="arrive notebook" style="--i:1">
+      <div data-filter>
+        {
+          // a control with nothing to choose from is left out
+          notes.length > 0 && (
+            <div class="toolbar" data-waiting>
+              <input
+                class="input"
+                type="search"
+                placeholder="title, summary, tag"
+                aria-label="Search the notes"
+                data-page-search
+                data-filter-text
+              />
+              {tags.length > 0 && (
+                <select class="select" aria-label="Tag" data-filter-tag>
+                  <option value="">All tags</option>
+                  {tags.map((tag) => (
+                    <option value={tag}>{tag}</option>
+                  ))}
+                </select>
+              )}
+              {years.length > 1 && (
+                <select class="select" aria-label="Year" data-filter-year>
+                  <option value="">All years</option>
+                  {years.map((year) => (
+                    <option value={year}>{year}</option>
+                  ))}
+                </select>
+              )}
+              <button class="btn is-quiet toolbar-end" type="button" data-filter-reset>
+                Reset
+              </button>
+              <noscript>
+                <p class="machine toolbar-closed">Search and filters need JavaScript. Every note is listed below.</p>
+              </noscript>
+            </div>
+          )
+        }
+
+        <div class="drawers" role="group" aria-label="Category" data-filter-category>
+          <button class="drawer" type="button" data-value="" aria-pressed="true" disabled>
+            <span class="machine drawer-code">All</span>
+            <span class="drawer-title">
+              <span class="drawer-name">All notes</span>
+            </span>
+            <span class="machine drawer-count">On file {notes.length}</span>
+          </button>
+          {
+            CATEGORY_KEYS.map((key) => (
+              <button
+                class="drawer"
+                type="button"
+                data-value={key}
+                data-name={CATEGORIES[key].label}
+                data-filed={filed(key)}
+                aria-pressed="false"
+                disabled
+              >
+                <span class="machine drawer-code">{CATEGORIES[key].code}</span>
+                <span class="drawer-title">
+                  <span class="drawer-name">{CATEGORIES[key].label}</span>{' '}
+                  <span class="drawer-zh" lang="zh">
+                    {CATEGORIES[key].zh}
+                  </span>
+                </span>
+                <span class="drawer-blurb">{CATEGORIES[key].blurb}</span>
+                <span class="machine drawer-count">
+                  {filed(key)}
+                  <span class="sr-only"> on file</span>
+                </span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="notes" data-list>
+        {
+          years.map((year) => (
+            <section id={`y${year}`} data-year={year}>
+              <h2 class="group">
+                {year}{' '}
+                <span class="label">
+                  <span data-filed>{notes.filter((note) => yearOf(note.data.date) === year).length}</span>
+                  <span class="sr-only"> on file</span>
+                </span>
+              </h2>
+              {notes
+                .filter((note) => yearOf(note.data.date) === year)
+                .map((note) => {
+                  const category = CATEGORIES[note.data.category];
+                  const language = LANGUAGES[note.data.lang];
+                  const minutes = readingMinutes(note.body, note.data.readingMinutes);
+                  return (
+                    <article
+                      class:list={['entry note', { 'has-cover': note.data.cover }]}
+                      id={note.id}
+                      data-item
+                      data-category={note.data.category}
+                      data-tag={note.data.tags.join(',')}
+                      data-year={year}
+                      data-text={`${note.data.title} ${note.data.summary} ${category.label} ${category.zh} ${category.code} ${note.data.tags.join(' ')} ${language.name} ${isoDate(note.data.date)}`.toLowerCase()}
+                    >
+                      <time class="machine note-date" datetime={isoDate(note.data.date)}>
+                        {dayMonth(note.data.date)}
+                      </time>
+                      <p class="machine note-code">
+                        <abbr title={category.label} aria-hidden="true">
+                          {category.code}
+                        </abbr>{' '}
+                        <span class="note-filed">{category.label}</span>
+                      </p>
+                      <p class="machine note-facts">
+                        <span>
+                          {minutes} min · <abbr title={language.name}>{language.code}</abbr>
+                        </span>
+                        {note.data.updated && <span>revised {longDate(note.data.updated)}</span>}
+                        {note.data.draft && <span class="stamp note-stamp">Draft</span>}
+                      </p>
+                      <div class="note-text">
+                        <h3 class="head-2 note-title" lang={note.data.lang}>
+                          <a class="plain" href={`/blog/${note.id}/`}>
+                            {note.data.title}
+                          </a>
+                        </h3>
+                        {note.data.summary && (
+                          <p class="note-summary" lang={note.data.lang}>
+                            {note.data.summary}
+                          </p>
+                        )}
+                        {note.data.tags.length > 0 && (
+                          <ul class="machine note-tags" aria-label="Tags">
+                            {note.data.tags.map((tag) => (
+                              <li>
+                                <button class="note-tag" type="button" data-tag={tag} aria-pressed="false" disabled>
+                                  #{tag}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      {
+                        // the title is the link; the picture is a second way in for the hand, not for the ear
+                        note.data.cover && (
+                          <a class="plate note-cover" href={`/blog/${note.id}/`} tabindex="-1" aria-hidden="true">
+                            <Image
+                              src={note.data.cover}
+                              alt={note.data.coverAlt || note.data.title}
+                              widths={[132, 264]}
+                              sizes="132px"
+                              width={264}
+                            />
+                          </a>
+                        )
+                      }
+                    </article>
+                  );
+                })}
+            </section>
+          ))
+        }
+        {
+          notes.length > 0 ? (
+            <p class="empty typed" data-none hidden>
+              Nothing on file matches that.
+            </p>
+          ) : (
+            <p class="empty typed">Nothing has been filed yet.</p>
+          )
+        }
+      </div>
+
+      <Fragment slot="status">
+        <span data-count aria-live="polite">
+          {notes.length} {notes.length === 1 ? 'note' : 'notes'}
+        </span>
+        {
+          latest && (
+            <span>
+              <span class="foot-tags">{`${tags.length} ${tags.length === 1 ? 'tag' : 'tags'} · `}</span>
+              {`latest ${longDate(latest.data.date)} · `}
+              <abbr title={CATEGORIES[latest.data.category].label}>{CATEGORIES[latest.data.category].code}</abbr>
+            </span>
+          )
+        }
+      </Fragment>
+    </Window>
+
+    <dl class="remarks arrive" style="--i:2">
+      <div>
+        <dt class="label">Scope</dt>
+        <dd>
+          The notebook is for research and technical writing. Side essays live separately, in{' '}
+          <a href={HALLS.life.href}>Life</a>: Chinese essays, side notes and writing that
+          should not dilute the academic archive.
+        </dd>
+      </div>
+      <div>
+        <dt class="label">Tags</dt>
+        <dd>A research-oriented taxonomy.</dd>
+      </div>
+      <div>
+        <dt class="label">Feed</dt>
+        <dd>New notes can be followed by <a href="/rss.xml">RSS</a>.</dd>
+      </div>
+    </dl>
+  </div>
+</Room>
+
+<style>
+  /* ---------- the directory by year, in the heading ---------- */
+
+  .jumps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .jumps a:hover {
+    color: var(--red);
+  }
+
+  /* ---------- the desk ---------- */
+
+  /*
+   * The controls wait for the page script. Until it is at work they are out of sight,
+   * and their place is kept, so that nothing moves when they appear.
+   */
+  .toolbar {
+    position: relative;
+  }
+
+  .toolbar[data-waiting] > * {
+    visibility: hidden;
+  }
+
+  .toolbar-closed {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--pad);
+    color: var(--ink-3);
+    visibility: visible;
+  }
+
+  /*
+   * The contents of the notebook: the whole of it, then its four categories.
+   * The columns are those of the ledger below: names stand over titles, and the last
+   * column is the count all the way down, so its unit is printed once, at the top.
+   */
+  .drawers {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .drawer {
+    display: grid;
+    grid-template-columns: 112px 128px 88px minmax(0, 1fr) auto;
+    column-gap: 24px;
+    align-items: baseline;
+    width: 100%;
+    padding: 6px var(--pad);
+    text-align: left;
+  }
+
+  /* without the script the table is a legend, not a set of controls */
+  .drawer:disabled {
+    cursor: default;
+  }
+
+  .drawer:enabled:not([aria-pressed='true']):hover {
+    background: var(--paper-2);
+  }
+
+  .drawer:focus-visible {
+    outline-offset: -3px;
+  }
+
+  /* on a wide window the name and its Chinese name are columns of their own */
+  .drawer-title {
+    display: contents;
+  }
+
+  .drawer-code,
+  .drawer-count {
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  .drawer-name,
+  .drawer-zh {
+    line-height: 1.3;
+  }
+
+  .drawer-zh {
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  .drawer-blurb {
+    grid-column: 4;
+    font-size: var(--t-typed-sm);
+    line-height: 1.4;
+    color: var(--ink-3);
+  }
+
+  .drawer-count {
+    grid-column: 5;
+    color: var(--ink);
+  }
+
+  /* an empty category recedes */
+  .drawer[data-filed='0'] .drawer-count {
+    color: var(--ink-3);
+  }
+
+  /* the drawer that is open wears the red mark and is struck twice */
+  .drawer[aria-pressed='true'] {
+    box-shadow: inset 3px 0 0 var(--red);
+  }
+
+  .drawer[aria-pressed='true'] .drawer-code {
+    color: var(--red);
+  }
+
+  .drawer[aria-pressed='true'] .drawer-name {
+    font-weight: 700;
+  }
+
+  /* ---------- the ledger ---------- */
+
+  /* every year after the first shown begins under a full line */
+  .notes section:not([hidden]) ~ section > .group {
+    border-top: 1px solid var(--ink);
+  }
+
+  /* a drawer is pulled open: its rows come forward, once */
+  .notes.is-opening {
+    animation: notes-open var(--settle) var(--ease) both;
+  }
+
+  @keyframes notes-open {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* date, category, the note, (its picture,) the facts: every part has its own column */
+  .note {
+    display: grid;
+    grid-template-columns: 56px 32px minmax(0, 1fr) 168px;
+    column-gap: 24px;
+    align-items: start;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  /* only a row that has a picture keeps a column for it */
+  .note.has-cover {
+    grid-template-columns: 56px 32px minmax(0, 1fr) 132px 168px;
+  }
+
+  /* red is kept for the category in use: a row that was sent for is marked in ink */
+  .note:target {
+    box-shadow: inset 3px 0 0 var(--ink);
+  }
+
+  .note > * {
+    grid-row: 1;
+  }
+
+  .note-date,
+  .note-code,
+  .note-facts {
+    padding-top: 6px;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  .note abbr {
+    text-decoration: none;
+  }
+
+  .note-code {
+    position: relative;
+  }
+
+  /* the rows of the category in use wear its colour */
+  .notes[data-open] .note-code abbr {
+    color: var(--red);
+  }
+
+  /* in columns the code stands alone for the eye; the name is kept for the ear */
+  .note-filed {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .note-facts {
+    grid-column: -2;
+    display: grid;
+    gap: 5px;
+    justify-items: end;
+  }
+
+  .note-stamp {
+    margin-top: 6px;
+  }
+
+  .note-text {
+    grid-column: 3;
+    overflow-wrap: anywhere;
+  }
+
+  .note-title a:hover {
+    color: var(--red);
+  }
+
+  /* a Chinese title is struck as heavily as an English one: typed Latin, printed Chinese */
+  .note-title:lang(zh) {
+    font-family: 'Courier Prime', 'Songti SC', 'STSong', 'Noto Serif CJK SC', 'Source Han Serif SC', 'SimSun', serif;
+    font-weight: 700;
+    font-synthesis-weight: auto;
+    letter-spacing: 0.04em;
+  }
+
+  .note-summary {
+    margin-top: 4px;
+    max-width: var(--measure);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .note-summary:lang(zh) {
+    line-height: 1.65;
+    letter-spacing: 0.03em;
+  }
+
+  .note-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+    margin-top: 9px;
+    color: var(--ink-3);
+  }
+
+  .note-tag {
+    text-transform: inherit;
+  }
+
+  .note-tag:disabled {
+    cursor: default;
+  }
+
+  .note-tag:enabled:hover {
+    color: var(--red);
+  }
+
+  /* the tag the list is filtered by */
+  .note-tag[aria-pressed='true'] {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 0.22em;
+  }
+
+  .note-cover {
+    grid-column: 4;
+    aspect-ratio: 3 / 2;
+  }
+
+  /* ---------- the status bar ---------- */
+
+  :global(.notebook > .win-foot) abbr {
+    text-decoration: none;
+  }
+
+  /* ---------- under the window: remarks typed on the paper ---------- */
+
+  .remarks {
+    display: grid;
+    gap: 6px;
+    margin-top: 24px;
+    font-size: var(--t-typed-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .remarks > div {
+    display: grid;
+    grid-template-columns: 56px minmax(0, var(--measure));
+    column-gap: 24px;
+    align-items: baseline;
+  }
+
+  .remarks a:hover {
+    color: var(--red);
+  }
+
+  /* ---------- no room for columns ---------- */
+
+  @media (max-width: 960px) {
+    /* a category is one line: code, name and Chinese name, count. Only the open one is described. */
+    .drawer {
+      grid-template-columns: 40px minmax(0, 1fr) auto;
+      column-gap: 14px;
+    }
+
+    .drawer-title {
+      display: block;
+      line-height: 1.3;
+    }
+
+    .drawer-zh {
+      margin-left: 0.4em;
+    }
+
+    .drawer-blurb {
+      display: none;
+      grid-column: 2 / -1;
+      grid-row: 2;
+    }
+
+    .drawer[aria-pressed='true'] .drawer-blurb {
+      display: block;
+    }
+
+    .drawer-count {
+      grid-column: 3;
+      grid-row: 1;
+    }
+
+    /* the facts become one line above the note */
+    .note,
+    .note.has-cover {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 14px;
+    }
+
+    .note-date,
+    .note-code,
+    .note-facts {
+      padding-top: 0;
+    }
+
+    .note-filed {
+      position: static;
+      width: auto;
+      height: auto;
+      margin: 0 0 0 0.5em;
+      overflow: visible;
+      clip-path: none;
+    }
+
+    .note-facts {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 14px;
+    }
+
+    .note-stamp {
+      margin-top: 0;
+    }
+
+    .note-text {
+      flex: 0 0 100%;
+      margin-top: 4px;
+    }
+
+    .note-cover {
+      flex: 0 0 auto;
+      width: 132px;
+      margin-top: 10px;
+    }
+  }
+
+  /* the desk in two rows: search and reset, then the selects side by side */
+  @media (max-width: 759px) {
+    .toolbar .input {
+      flex: 1 1 calc(100% - 110px);
+      max-width: none;
+    }
+
+    .toolbar .select {
+      order: 1;
+      flex: 0 1 calc(50% - 7px);
+    }
+
+    .toolbar-end {
+      margin-left: 0;
+    }
+  }
+
+  /* a telephone */
+  @media (max-width: 420px) {
+    :global(.notebook) {
+      --pad: 14px;
+    }
+
+    .drawer {
+      grid-template-columns: 28px minmax(0, 1fr) auto;
+      column-gap: 10px;
+    }
+
+    .remarks > div {
+      grid-template-columns: 44px minmax(0, 1fr);
+      column-gap: 12px;
+    }
+
+    /* the read-out is kept to one line; when a filter lengthens it, the second line has air */
+    .foot-tags {
+      display: none;
+    }
+
+    :global(.notebook > .win-foot) {
+      flex-wrap: wrap;
+      gap: 6px 16px;
+      padding: 5px var(--pad);
+    }
+  }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/page';
+  import { initFilter } from '../../scripts/desk/filter';
+
+  onPage(() => {
+    if (!document.querySelector('.notebook')) return;
+    const bar = document.querySelector<HTMLElement>('[data-filter]');
+    const list = document.querySelector<HTMLElement>('[data-list]');
+    const none = list?.querySelector<HTMLElement>('[data-none]');
+    const chosen = bar?.querySelector<HTMLSelectElement>('[data-filter-tag]');
+    const jumps = document.querySelector<HTMLElement>('[data-jumps]');
+    const nothing = none?.textContent?.trim() ?? '';
+
+    // The controls have waited for this script: they are put to work before the filter reads the address.
+    bar?.querySelector('[data-waiting]')?.removeAttribute('data-waiting');
+    document.querySelectorAll<HTMLButtonElement>('.drawer, .note-tag').forEach((button) => (button.disabled = false));
+
+    initFilter();
+
+    // What follows from the state of the filter, which has already answered by the time this runs.
+    function settle() {
+      const open = bar?.querySelector<HTMLElement>('[data-filter-category] [aria-pressed="true"]');
+      list?.toggleAttribute('data-open', Boolean(open?.dataset.value));
+
+      // Each year says how many of its notes are shown ("2 of 18"); a year with none cannot be gone to.
+      list?.querySelectorAll<HTMLElement>('section').forEach((year) => {
+        const all = year.querySelectorAll('[data-item]').length;
+        const shown = year.querySelectorAll('[data-item]:not([hidden])').length;
+        const figure = year.querySelector<HTMLElement>('[data-filed]');
+        if (figure) figure.textContent = shown === all ? `${all}` : `${shown} of ${all}`;
+        jumps?.querySelector(`[data-jump="${year.dataset.year}"]`)?.toggleAttribute('hidden', shown === 0);
+      });
+      if (jumps) jumps.hidden = !jumps.querySelector('[data-jump]:not([hidden])');
+
+      list?.querySelectorAll<HTMLElement>('.note-tag').forEach((tag) => {
+        tag.setAttribute('aria-pressed', String(Boolean(chosen?.value) && tag.dataset.tag === chosen?.value));
+      });
+
+      // An empty category is not a search that failed.
+      if (none) {
+        none.textContent = open?.dataset.filed === '0' ? `Nothing filed under ${open.dataset.name} yet.` : nothing;
+      }
+    }
+
+    bar?.addEventListener('input', settle);
+    bar?.addEventListener('change', settle);
+    bar?.addEventListener('click', settle);
+    settle();
+
+    // Choosing a category brings its rows forward.
+    bar?.querySelector<HTMLElement>('[data-filter-category]')?.addEventListener('click', (event) => {
+      if (!list || !(event.target as HTMLElement).closest('[data-value]')) return;
+      list.classList.remove('is-opening');
+      void list.offsetWidth; // so that the movement starts again
+      list.classList.add('is-opening');
+    });
+
+    // A tag on a row chooses that tag at the desk; chosen again, it is let go.
+    list?.addEventListener('click', (event) => {
+      const tag = (event.target as HTMLElement).closest<HTMLElement>('.note-tag');
+      if (!tag || !chosen) return;
+      chosen.value = chosen.value === tag.dataset.tag ? '' : (tag.dataset.tag ?? '');
+      chosen.dispatchEvent(new Event('change', { bubbles: true }));
+      bar?.scrollIntoView({ block: 'nearest' });
+    });
+  });
+</script>

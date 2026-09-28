@@ -1,0 +1,417 @@
+---
+/**
+ * HALL 03 - PROJECTS
+ * Things built, a selection. One entry per project (src/content/projects/*.md), in the
+ * order set by `order` in each file; the text of the file is the description.
+ * The drawing of a project on the work board is the channel in src/data/board.yaml
+ * whose id is the project's id.
+ */
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Room from '../../layouts/Room.astro';
+import Window from '../../components/chrome/Window.astro';
+import PageHead from '../../components/chrome/PageHead.astro';
+import { HALLS, getChannels, getProjects, realLink } from '../../lib/content';
+import { profile } from '../../lib/data';
+
+const hall = HALLS.projects;
+const projects = await getProjects();
+const drawings = (await getChannels()).filter((channel) => channel.data.kind === 'project');
+
+const linkLabels = { paper: 'Paper', code: 'Code', demo: 'Demo' } as const;
+
+const entries = await Promise.all(
+  projects.map(async (project) => {
+    const { Content } = await render(project);
+    const links = (Object.keys(linkLabels) as (keyof typeof linkLabels)[])
+      .map((key) => ({ label: linkLabels[key], href: project.data.links[key] }))
+      .filter((link) => realLink(link.href));
+    const drawing = drawings.find((channel) => channel.data.id === project.id);
+    // a square or upright picture would touch the frame above and below: it is given a margin
+    const figure = project.data.figure;
+    const upright = figure ? figure.width / figure.height < 1.2 : false;
+    return { project, Content, links, drawing, upright };
+  }),
+);
+
+const years = [...new Set(projects.map((project) => project.data.year))].sort((a, b) => b - a);
+const tags = [...new Set(projects.flatMap((project) => project.data.tags))].sort((a, b) =>
+  a.localeCompare(b, 'en', { sensitivity: 'base' }),
+);
+const featured = projects.filter((project) => project.data.featured).length;
+---
+
+<Room
+  hall="projects"
+  title="Projects"
+  description={`Selected work by ${profile.name}: research systems, experiments, and engineering builds, each with its description, figure and links.`}
+>
+  <div class="page">
+    <PageHead
+      no={hall.no}
+      title="Projects"
+      lede="Research systems, experiments, and engineering builds. Research-heavy work is marked featured."
+    />
+
+    <Window id="works" title="Selected work" document flush class="arrive works" style="--i:1">
+      <div class="toolbar" data-filter>
+        <input
+          class="input"
+          type="search"
+          placeholder="title, tag, text"
+          aria-label="Search projects"
+          data-page-search
+          data-filter-text
+        />
+        <select class="select works-tag" aria-label="Tag" data-filter-tag>
+          <option value="">All tags</option>
+          {tags.map((tag) => <option value={tag}>{tag}</option>)}
+        </select>
+        {/* the year and Reset keep together: Reset never stands alone in a row */}
+        <div class="works-last">
+          <select class="select works-year" aria-label="Year" data-filter-year>
+            <option value="">All years</option>
+            {years.map((year) => <option value={year}>{year}</option>)}
+          </select>
+          <button class="btn is-quiet toolbar-end" type="button" data-filter-reset>Reset</button>
+        </div>
+      </div>
+
+      <div data-list>
+        {
+          entries.map(({ project, Content, links, drawing, upright }) => (
+            <article
+              class="entry project"
+              id={project.id}
+              data-item
+              data-year={project.data.year}
+              data-tag={project.data.tags.join(',')}
+              data-text={`${project.data.title} ${project.data.year} ${project.data.featured ? 'featured' : ''} ${project.data.tags.join(' ')} ${project.body ?? ''}`.toLowerCase()}
+            >
+              <p class="project-when">
+                <span class="dots dots-sm">{project.data.year}</span>
+                {' '}
+                {project.data.featured && <span class="hand">featured</span>}
+              </p>
+
+              <h3 class="head-2 project-title">{project.data.title}</h3>
+
+              <div class="project-body">
+                <Content />
+              </div>
+
+              {project.data.figure && (
+                <a
+                  class:list={['plate project-figure', { 'is-upright': upright }]}
+                  href={project.data.figure.src}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`Open the figure: ${project.data.figureAlt || project.data.title}`}
+                >
+                  <Image
+                    src={project.data.figure}
+                    alt={project.data.figureAlt}
+                    widths={[320, 640]}
+                    sizes="320px"
+                    width={640}
+                  />
+                </a>
+              )}
+
+              {(project.data.tags.length > 0 || links.length > 0 || drawing) && (
+                <div class="project-foot">
+                  {/* typed as words; the script below makes each one a key of the tag filter */}
+                  {project.data.tags.length > 0 && (
+                    <ul class="project-tags" aria-label="Tags">
+                      {project.data.tags.map((tag, index) => (
+                        <li>
+                          <span data-tag={tag}>{tag.replace(/ /g, ' ')}</span>
+                          {index < project.data.tags.length - 1 && ', '}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {(links.length > 0 || drawing) && (
+                    <ul class="project-links">
+                      {links.map((link) => (
+                        <li>
+                          <a href={link.href} target="_blank" rel="noopener">
+                            {link.label}
+                          </a>
+                        </li>
+                      ))}
+                      {drawing && (
+                        <li>
+                          <a href={`/#work=${drawing.data.id}`}>
+                            On the work board
+                          </a>
+                        </li>
+                      )}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </article>
+          ))
+        }
+        <p class="empty typed" data-none hidden>Nothing on file matches that.</p>
+      </div>
+
+      <Fragment slot="status">
+        <span data-count aria-live="polite">
+          {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+        </span>
+        <span>
+          {tags.length} {tags.length === 1 ? 'tag' : 'tags'} · {featured} featured · latest {years[0]}
+        </span>
+      </Fragment>
+    </Window>
+  </div>
+</Room>
+
+<style>
+  /* room for the longest tag */
+  .toolbar .works-tag {
+    flex-basis: 232px;
+  }
+
+  .works-last {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  /* year in the margin, the text in a column of reading width, the figure beside it */
+  .project {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr) 280px;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      'when title figure'
+      'when body  figure'
+      'when foot  figure';
+    column-gap: 32px;
+    padding-block: 38px 42px;
+    border-top: 0;
+  }
+
+  /* a rule only between two entries that are both shown */
+  .project:not([hidden]) ~ .project {
+    border-top: 1px solid var(--rule-2);
+  }
+
+  /* the year and the first line of the title stand on one line */
+  .project-when {
+    grid-area: when;
+    align-self: first baseline;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    justify-items: start;
+  }
+
+  .project-title {
+    grid-area: title;
+    align-self: first baseline;
+    max-width: var(--measure);
+    overflow-wrap: break-word;
+  }
+
+  .project-body {
+    grid-area: body;
+    max-width: var(--measure);
+    margin-top: 12px;
+    line-height: 1.62;
+    overflow-wrap: break-word;
+  }
+
+  .project-body :global(p + p) {
+    margin-top: 0.9em;
+  }
+
+  .project-figure {
+    grid-area: figure;
+    align-self: start;
+    aspect-ratio: 16 / 10;
+    background: var(--bond);
+  }
+
+  /* figures are diagrams and marks of every shape: show each whole, never cropped */
+  .project-figure :global(img) {
+    object-fit: contain;
+  }
+
+  .project-figure.is-upright :global(img) {
+    padding: 16px;
+  }
+
+  /* below the text and as wide as the text: the key words, then where to go from here */
+  .project-foot {
+    grid-area: foot;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    max-width: var(--measure);
+    margin-top: 18px;
+  }
+
+  .project-tags,
+  .project-links {
+    font-size: var(--t-typed-sm);
+    line-height: 1.6;
+  }
+
+  /* a tag stays on one line and keeps its comma; the lines of the list are of even length */
+  .project-tags {
+    color: var(--ink-2);
+    text-wrap: balance;
+  }
+
+  .project-tags li {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  /* the space after the comma: one character of the typed face */
+  .project-tags li:not(:last-child) {
+    margin-right: 0.6em;
+  }
+
+  /* the keys are made by the script, so the scoped selector cannot reach them */
+  .project-tags :global(button:hover),
+  .project-tags :global(button[aria-pressed='true']) {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: var(--red);
+  }
+
+  .project-tags :global(button[aria-pressed='true']) {
+    font-weight: 700;
+  }
+
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 24px;
+  }
+
+  @media (min-width: 1000px) {
+    /* a widened window: the figure stays beside its text */
+    :global(.page[data-wide]) .project {
+      grid-template-columns: 76px minmax(0, var(--measure)) 280px;
+      justify-content: start;
+      column-gap: 48px;
+    }
+  }
+
+  @media (max-width: 999px) {
+    .project {
+      grid-template-columns: 76px minmax(0, 1fr);
+      grid-template-rows: none;
+      grid-template-areas:
+        'when title'
+        'when body'
+        'when figure'
+        'when foot';
+      column-gap: 24px;
+    }
+
+    .project-figure {
+      width: min(100%, 320px);
+      margin-top: 20px;
+    }
+
+    /* the controls fill the rows they fall into */
+    .toolbar .works-tag {
+      flex-grow: 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .project {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'when'
+        'title'
+        'body'
+        'figure'
+        'foot';
+      padding-block: 28px 32px;
+    }
+
+    .project-when {
+      grid-auto-flow: column;
+      gap: 14px;
+      align-items: baseline;
+      justify-content: start;
+      margin-bottom: 10px;
+    }
+
+    .toolbar .input {
+      max-width: none;
+    }
+
+    .toolbar .works-year {
+      flex: 1 1 120px;
+    }
+
+    /* the figures in the status bar may take a second line on a small screen */
+    :global(.works > .win-foot) {
+      flex-wrap: wrap;
+      gap: 2px 16px;
+      padding: 5px 10px;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .toolbar .works-tag {
+      flex-basis: 100%;
+    }
+  }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/page';
+  import { initFilter } from '../../scripts/desk/filter';
+
+  onPage(() => {
+    if (!document.querySelector('.works')) return;
+    initFilter();
+
+    // Each tag typed under an entry becomes a key of the tag filter:
+    // chosen, it sets the filter; chosen a second time, it clears it.
+    const select = document.querySelector<HTMLSelectElement>('[data-filter-tag]');
+    if (!select) return;
+
+    const keys = Array.from(document.querySelectorAll<HTMLElement>('.project-tags [data-tag]')).map((word) => {
+      const key = document.createElement('button');
+      key.type = 'button';
+      key.dataset.tag = word.dataset.tag ?? '';
+      key.textContent = word.textContent;
+      word.replaceWith(key);
+      return key;
+    });
+
+    const paint = () => {
+      for (const key of keys) key.setAttribute('aria-pressed', String(key.dataset.tag === select.value));
+    };
+
+    for (const key of keys) {
+      key.addEventListener('click', () => {
+        const before = key.getBoundingClientRect().top;
+        select.value = select.value === key.dataset.tag ? '' : (key.dataset.tag ?? '');
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        // entries above may have gone: keep the chosen tag where the visitor is looking
+        window.scrollBy(0, key.getBoundingClientRect().top - before);
+      });
+    }
+
+    select.addEventListener('change', paint);
+    document.querySelector('[data-filter-reset]')?.addEventListener('click', paint);
+    paint();
+  });
+</script>

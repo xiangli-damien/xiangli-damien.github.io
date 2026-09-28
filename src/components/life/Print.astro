@@ -1,0 +1,226 @@
+---
+/**
+ * The print viewer: a picture from a list, opened in a window of its own, in its own colours.
+ * The visitor stays in the hall; the close box returns to the place the picture came from.
+ *
+ * Any link to a picture can ask for it:
+ *
+ *   <a href="large.webp" data-print="Frame 03" data-print-ratio="1" data-print-note="Illustration">
+ *
+ *   data-print         the title of the window
+ *   data-print-ratio   width of the picture divided by its height
+ *   data-print-note    a word for the status bar
+ *
+ * Links that stand in the same [data-print-roll] are one roll: the viewer steps through them.
+ * Without JavaScript the link opens the picture itself.
+ *
+ * It is kept with the contact sheet, its only user today. Nothing in it depends on the sheet.
+ */
+---
+
+<dialog class="print" aria-labelledby="print-title" data-print-viewer>
+  <div class="win print-win" data-active>
+    <header class="win-bar">
+      <button class="win-box" type="button" aria-label="Close and return to the list" title="Close" data-print-close>
+        <svg viewBox="0 0 9 9" aria-hidden="true">
+          <path d="M1 1l7 7M8 1l-7 7" stroke="currentColor" fill="none"></path>
+        </svg>
+      </button>
+      <h2 class="win-title" id="print-title" data-print-title>Print</h2>
+    </header>
+    <div class="win-body is-flush">
+      <div class="toolbar print-bar">
+        <button class="btn is-quiet" type="button" data-print-step="-1">Previous</button>
+        <button class="btn is-quiet" type="button" data-print-step="1">Next</button>
+        <button class="btn is-quiet toolbar-end" type="button" data-print-close>Close</button>
+      </div>
+      <div class="print-picture" data-print-picture>
+        <img alt="" decoding="async" data-print-image />
+      </div>
+    </div>
+    <footer class="win-foot">
+      <span data-print-note></span>
+      <span aria-live="polite" data-print-place></span>
+    </footer>
+  </div>
+</dialog>
+
+<style>
+  /* The dialog is only the place where the window stands; the window is what is seen. */
+  .print {
+    position: fixed;
+    inset: 0;
+    width: fit-content;
+    height: fit-content;
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    overflow: visible;
+  }
+
+  .print::backdrop {
+    background: color-mix(in srgb, var(--paper) 72%, transparent);
+  }
+
+  /* Laid out but not shown: the window is measured before it opens. */
+  .print.is-measuring:not([open]) {
+    display: block;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .print-bar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .print-bar [aria-disabled='true'],
+  .print-bar [aria-disabled='true']:hover {
+    border-color: var(--rule);
+    background: var(--bond);
+    color: var(--ink-3);
+    cursor: default;
+  }
+
+  /* As large as the screen allows, never larger than a print held in the hand. */
+  .print-picture {
+    width: min(560px, calc(100vw - 34px), calc((100dvh - 172px) * var(--r, 1)));
+    margin: 0 auto;
+    aspect-ratio: var(--r, 1);
+    background: var(--paper-2);
+  }
+
+  .print-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .print-picture img:not([src]) {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/page';
+  import { zoomRects } from '../../scripts/desk/zoomrects';
+
+  function initPrints(leaving: AbortSignal) {
+    const viewer = document.querySelector<HTMLDialogElement>('[data-print-viewer]');
+    const frame = viewer?.querySelector<HTMLElement>('.win');
+    const title = viewer?.querySelector<HTMLElement>('[data-print-title]');
+    const picture = viewer?.querySelector<HTMLElement>('[data-print-picture]');
+    const image = viewer?.querySelector<HTMLImageElement>('[data-print-image]');
+    const note = viewer?.querySelector<HTMLElement>('[data-print-note]');
+    const place = viewer?.querySelector<HTMLElement>('[data-print-place]');
+    if (!viewer || !frame || !title || !picture || !image || !note || !place) return;
+    if (typeof viewer.showModal !== 'function') return;
+
+    const steps = Array.from(viewer.querySelectorAll<HTMLButtonElement>('[data-print-step]'));
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    let roll: HTMLAnchorElement[] = [];
+    let at = 0;
+    let busy = false;
+
+    // The small print on the page: the window opens out of it and closes into it.
+    const seen = (link: HTMLAnchorElement) => (link.querySelector('img') ?? link).getBoundingClientRect();
+
+    function show(index: number) {
+      at = index;
+      const link = roll[at];
+      title!.textContent = link.dataset.print || 'Print';
+      note!.textContent = link.dataset.printNote ?? '';
+      place!.textContent = roll.length > 1 ? `${pad(at + 1)} of ${pad(roll.length)}` : '';
+      picture!.style.setProperty('--r', link.dataset.printRatio || '1');
+      image!.alt = link.querySelector('img')?.alt ?? '';
+      image!.src = link.href;
+      for (const button of steps) {
+        const to = at + Number(button.dataset.printStep);
+        const none = to < 0 || to >= roll.length;
+        button.hidden = roll.length < 2;
+        // Kept in reach of the keyboard, so that the place is not lost at either end of the roll.
+        button.setAttribute('aria-disabled', String(none));
+        if (!none) new Image().src = roll[to].href;
+      }
+    }
+
+    function step(by: number) {
+      const to = at + by;
+      if (to >= 0 && to < roll.length) show(to);
+    }
+
+    function open(link: HTMLAnchorElement) {
+      if (busy || viewer!.open) return;
+      const holder = link.closest('[data-print-roll]');
+      roll = holder ? Array.from(holder.querySelectorAll<HTMLAnchorElement>('a[data-print]')) : [link];
+      show(Math.max(0, roll.indexOf(link)));
+
+      viewer!.classList.add('is-measuring');
+      const to = frame!.getBoundingClientRect();
+      viewer!.classList.remove('is-measuring');
+
+      busy = true;
+      zoomRects(seen(link), to).then(() => {
+        busy = false;
+        viewer!.showModal();
+      });
+    }
+
+    function close() {
+      if (!viewer!.open) return;
+      const from = frame!.getBoundingClientRect();
+      const link = roll[at];
+      viewer!.close();
+      image!.removeAttribute('src');
+      if (!link) return;
+      link.focus({ preventScroll: true });
+      link.scrollIntoView({ block: 'nearest' });
+      zoomRects(from, seen(link));
+    }
+
+    // In the capturing phase: the print is opened here, before the link is followed as a page.
+    document.addEventListener(
+      'click',
+      (event) => {
+        const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[data-print]');
+        if (!link || event.defaultPrevented || event.button !== 0) return;
+        // With a key held down the visitor is asking the browser for a tab or a window.
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        open(link);
+      },
+      { signal: leaving, capture: true },
+    );
+    leaving.addEventListener('abort', () => {
+      if (viewer.open) viewer.close();
+    });
+
+    viewer.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      const button = target.closest<HTMLButtonElement>('[data-print-step]');
+      if (button) step(Number(button.dataset.printStep));
+      // A click beside the window lands on the dialog itself.
+      else if (target === viewer || target.closest('[data-print-close]')) close();
+    });
+
+    viewer.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') step(-1);
+      else if (event.key === 'ArrowRight') step(1);
+      else return;
+      event.preventDefault();
+    });
+
+    // Escape closes as the close box does.
+    viewer.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      close();
+    });
+  }
+
+  onPage(initPrints);
+</script>

@@ -1,0 +1,234 @@
+---
+/**
+ * NOT ON FILE - the page shown for an address that does not exist (built as /404.html).
+ * It belongs to no hall, so the visitor stands at the entrance with the whole hall ahead.
+ * One slip stands beside the carpet, where the windows of the entrance desk stand: the way
+ * in and the name on every gate stay open. The words of the slip are written here; the
+ * list of halls comes from HALLS in src/lib/content.ts.
+ */
+import Room from '../layouts/Room.astro';
+import Window from '../components/chrome/Window.astro';
+import { HALLS, type HallKey } from '../lib/content';
+
+const halls = (Object.keys(HALLS) as HallKey[]).map((key) => ({ key, ...HALLS[key] }));
+---
+
+<Room hall="home" desk={false} page="lost" title="Not on file" description="Nothing is filed at this address." noindex>
+  <div class="page lost">
+    <h1 class="sr-only">Not on file</h1>
+
+    {/* it stands left of the carpet, and leaves by the left when the visitor walks in */}
+    <Window id="slip" title="Slip" document side={-1} class="arrive slip" style="--i:1">
+      {/* the words of the heading above, set large for the eye, and the number the server gave */}
+      <p class="slip-head">
+        <span class="dots dots-md" aria-hidden="true">NOT ON FILE</span>
+        <span class="label"><span class="sr-only">Error </span>404</span>
+      </p>
+      {/* the script below writes the address that was asked for in place of "this address" */}
+      <p class="slip-said">Nothing is filed at <span data-asked>this address</span>.</p>
+
+      <nav class="slip-go" aria-labelledby="slip-go">
+        <h3 class="heading" id="slip-go">Go to</h3>
+        <ol class="slip-halls">
+          {
+            halls.map((hall) => (
+              <li>
+                <a class="plain" href={hall.href}>
+                  <span class="machine">{hall.no}</span>
+                  <span>{hall.title}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      {/* both need the script, so both stay hidden until it has run */}
+      <div class="btns slip-acts">
+        <button
+          class="btn"
+          type="button"
+          aria-label="Find a page"
+          aria-keyshortcuts="Control+K"
+          data-open-finder
+          data-scripted
+          hidden
+        >
+          Find<span class="slip-key" aria-hidden="true">Ctrl K</span>
+        </button>
+        <button class="btn is-quiet" type="button" data-back hidden>Back</button>
+      </div>
+    </Window>
+  </div>
+</Room>
+
+<style>
+  .lost {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--gap) 16px 40px;
+  }
+
+  .lost > :global(.slip) {
+    flex: none;
+    width: min(100%, 360px);
+  }
+
+  /* a slip cannot be zoomed: it keeps only the close box, which walks back to the entrance */
+  :global(.slip .win-box.is-right) {
+    display: none;
+  }
+
+  .slip-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .slip-said {
+    margin-top: 8px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  /* the address is what the visitor typed: struck twice, and broken wherever the line ends */
+  .slip-said [data-asked-for] {
+    font-weight: 700;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+
+  .slip-go {
+    margin-top: 18px;
+  }
+
+  /* two columns, read downwards: 00 to 02, then 03 to 05; neither is narrower than its longest name */
+  .slip-halls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(max-content, 1fr));
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    column-gap: 20px;
+    margin-top: 5px;
+  }
+
+  .slip-halls a {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 3px 0 2px;
+    line-height: 1.4;
+  }
+
+  .slip-halls .machine {
+    color: var(--ink-3);
+  }
+
+  .slip-halls a:hover,
+  .slip-halls a:hover .machine {
+    color: var(--red);
+  }
+
+  .slip-acts {
+    margin-top: 16px;
+  }
+
+  .slip-acts:not(:has(:not([hidden]))) {
+    display: none;
+  }
+
+  .slip-key {
+    color: var(--ink-3);
+  }
+
+  .btn:hover .slip-key {
+    color: inherit;
+  }
+
+  /* on the narrowest screens everything stands a little closer: the heading keeps to one line, the halls to two columns */
+  @media (max-width: 339px) {
+    .slip-head {
+      gap: 8px;
+    }
+
+    .slip-halls {
+      column-gap: 10px;
+    }
+
+    .slip-halls a {
+      gap: 8px;
+    }
+  }
+
+  /*
+   * Where the hall stands above the page (the same condition as in chrome.css), the slip
+   * is all there is to read and must not wait below the fold. These two rules override
+   * the chrome, for this page only. No more of the hall is left open than the first gate
+   * needs to be seen whole, a little over half its width, because the drawing is framed
+   * by its width (src/scripts/archive/scene.ts). So shallow a view has no floor in front
+   * of the gate for the remark pencilled there, which is put away.
+   */
+  @media (max-width: 1199px), (pointer: coarse) {
+    :global(:root[data-page='lost']) {
+      --open-room: min(62vh, 560px, 54vw);
+    }
+
+    :global(:root[data-page='lost'] .hall-note) {
+      display: none;
+    }
+  }
+
+  /*
+   * Where the hall is the whole room (the same condition as for --hall-h in chrome.css),
+   * the slip stands at the left as the windows of the entrance desk do, a quarter of the
+   * room wide, so that it ends well before the name on the first gate. It stays there when
+   * the page is scrolled to the colophon: the hall does not move, so neither does the slip.
+   */
+  @media (min-width: 1200px) and (pointer: fine), (min-width: 1200px) and (pointer: none) {
+    .lost {
+      width: 100%;
+      align-items: flex-start;
+      min-height: calc(100vh - var(--strip));
+      min-height: calc(100dvh - var(--strip));
+      padding: var(--gap) var(--gap) 40px;
+      /* the gates can be chosen through the empty page */
+      pointer-events: none;
+    }
+
+    .lost > :global(.slip) {
+      position: sticky;
+      top: calc(var(--strip) + var(--gap));
+      width: clamp(300px, 25vw, 360px);
+      pointer-events: auto;
+    }
+  }
+</style>
+
+<script>
+  import { onPage } from '../scripts/page';
+
+  onPage(() => {
+    // The address that was asked for, quoted as it was typed.
+    const asked = document.querySelector<HTMLElement>('[data-asked]');
+    if (!asked) return;
+    let address = location.pathname;
+    try {
+      address = decodeURIComponent(address);
+    } catch {
+      /* not valid escapes: quote it as it was sent */
+    }
+    asked.textContent = address.length > 96 ? `${address.slice(0, 96)}…` : address;
+    asked.toggleAttribute('data-asked-for', true);
+
+    document.querySelectorAll<HTMLElement>('[data-scripted]').forEach((control) => (control.hidden = false));
+
+    // Back is only offered when there is somewhere to go back to.
+    const back = document.querySelector<HTMLButtonElement>('[data-back]');
+    if (back && history.length > 1) {
+      back.hidden = false;
+      back.addEventListener('click', () => history.back());
+    }
+  });
+</script>

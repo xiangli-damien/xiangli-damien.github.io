@@ -1,0 +1,53 @@
+---
+/**
+ * HALL 02 - NOTES: one note.
+ */
+import { render } from 'astro:content';
+import Reader from '../../components/read/Reader.astro';
+import { CATEGORIES, getNotes, longDate, readingMinutes, wordCount, type Note } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const notes = await getNotes();
+  return notes.map((note, index) => ({
+    params: { slug: note.id },
+    props: { note, newer: notes[index - 1] ?? null, older: notes[index + 1] ?? null },
+  }));
+}
+
+interface Props {
+  note: Note;
+  newer: Note | null;
+  older: Note | null;
+}
+
+const { note, newer, older } = Astro.props;
+const { Content, headings } = await render(note);
+const category = CATEGORIES[note.data.category];
+const minutes = readingMinutes(note.body, note.data.readingMinutes);
+const words = wordCount(note.body);
+const link = (other: Note | null) => (other ? { href: `/blog/${other.id}/`, title: other.data.title } : null);
+---
+
+<Reader
+  hall="blog"
+  title={note.data.title}
+  summary={note.data.summary}
+  lang={note.data.lang}
+  meta={[
+    longDate(note.data.date),
+    ...(note.data.updated ? [`revised ${longDate(note.data.updated)}`] : []),
+    category.label,
+    `${minutes} min`,
+  ]}
+  tags={note.data.tags}
+  tagHref="/blog/?tag="
+  headings={headings}
+  newer={link(newer)}
+  older={link(older)}
+  stamp={note.data.draft ? 'Draft' : undefined}
+  file={`${category.code}/${note.id}`}
+  status={`${words.toLocaleString('en-US')} words`}
+  image={note.data.cover?.src}
+>
+  <Content />
+</Reader>

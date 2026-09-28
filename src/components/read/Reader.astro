@@ -1,0 +1,193 @@
+---
+/**
+ * A document to read: a note or an essay. Heading, the text in a window, and a side
+ * column with the table of contents.
+ */
+import 'katex/dist/katex.min.css';
+import '../../styles/prose.css';
+
+import Room from '../../layouts/Room.astro';
+import Window from '../chrome/Window.astro';
+import PageHead from '../chrome/PageHead.astro';
+import Toc from './Toc.astro';
+import { HALLS, type HallKey } from '../../lib/content';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Link {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  hall: HallKey;
+  title: string;
+  summary?: string;
+  lang?: 'en' | 'zh';
+  /** short facts under the title: date, category, reading time */
+  meta?: string[];
+  tags?: string[];
+  /** where the tags link to; the tag is appended */
+  tagHref?: string;
+  headings?: Heading[];
+  /** the documents filed before and after this one */
+  newer?: Link | null;
+  older?: Link | null;
+  /** a word stamped on the page: DRAFT, TEMPLATE */
+  stamp?: string;
+  /** a remark shown in the side column */
+  note?: string;
+  /** name of the window, e.g. the file name */
+  file?: string;
+  /** status bar text */
+  status?: string;
+  image?: string;
+}
+
+const {
+  hall,
+  title,
+  summary,
+  lang = 'en',
+  meta = [],
+  tags = [],
+  tagHref,
+  headings = [],
+  newer,
+  older,
+  stamp,
+  note,
+  file = 'Document',
+  status,
+  image,
+} = Astro.props;
+
+const here = HALLS[hall];
+const contents = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const hasSide = contents.length >= 3 || Boolean(note);
+---
+
+<Room hall={hall} title={title} description={summary} lang={lang} image={image}>
+  <div class="page">
+    <PageHead no={here.no} title={title} lede={summary} long lang={lang}>
+      <ol class="crumbs" slot="crumbs">
+        <li><a href="/">Entrance</a></li>
+        <li><a href={here.href}>{here.title}</a></li>
+      </ol>
+      {
+        (meta.length > 0 || tags.length > 0) && (
+          <p class="page-meta">
+            {meta.map((item) => (
+              <span>{item}</span>
+            ))}
+            {tags.map((tag) =>
+              tagHref ? <a href={`${tagHref}${encodeURIComponent(tag)}`}>#{tag}</a> : <span>#{tag}</span>,
+            )}
+          </p>
+        )
+      }
+    </PageHead>
+
+    <div class:list={['page-grid', { 'has-side': hasSide }]}>
+      <Window id="document" title={file} document class="arrive reader" style="--i:1" status={status}>
+        {stamp && <span class="stamp reader-stamp">{stamp}</span>}
+        <article class="prose" lang={lang}>
+          <slot />
+        </article>
+
+        {
+          (newer || older) && (
+            <nav class="reader-next" aria-label="Other documents">
+              {older ? (
+                <a class="plain" href={older.href} rel="prev">
+                  <span class="label">Filed before</span>
+                  <span>{older.title}</span>
+                </a>
+              ) : (
+                <span />
+              )}
+              {newer ? (
+                <a class="plain is-right" href={newer.href} rel="next">
+                  <span class="label">Filed after</span>
+                  <span>{newer.title}</span>
+                </a>
+              ) : (
+                <span />
+              )}
+            </nav>
+          )
+        }
+      </Window>
+
+      {
+        hasSide && (
+          <aside class="page-side arrive" style="--i:2">
+            {contents.length >= 3 && (
+              <Window id="contents" title="Contents" document status={`${contents.length} sections`}>
+                <Toc headings={headings} />
+              </Window>
+            )}
+            {note && (
+              <Window id="remark" title="Remark" document>
+                <p class="reader-note">{note}</p>
+              </Window>
+            )}
+          </aside>
+        )
+      }
+    </div>
+  </div>
+</Room>
+
+<style>
+  :global(.reader > .win-body) {
+    position: relative;
+    padding: clamp(22px, 4vw, 48px) clamp(18px, 5vw, 64px) clamp(26px, 4vw, 52px);
+  }
+
+  .reader-stamp {
+    position: absolute;
+    top: 22px;
+    right: 26px;
+    z-index: 1;
+  }
+
+  .reader-next {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    max-width: var(--measure);
+    margin-top: 3.4em;
+    padding-top: 1.2em;
+    border-top: 1px solid var(--ink);
+  }
+
+  .reader-next a {
+    display: grid;
+    gap: 4px;
+    line-height: 1.35;
+  }
+
+  .reader-next a:hover {
+    color: var(--red);
+  }
+
+  .reader-next .is-right {
+    text-align: right;
+  }
+
+  .reader-note {
+    font-size: var(--t-typed-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  /* the side windows are fixtures: they have no boxes to close or zoom them */
+  .page-side :global(.win-box) {
+    display: none;
+  }
+</style>

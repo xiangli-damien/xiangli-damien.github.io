@@ -1,0 +1,168 @@
+---
+/**
+ * One row of the curriculum vitae.
+ * Left: what the apparatus printed (a date, a place, the name of a field).
+ * Right: what was typed. The hairline between the two is the time line; a row that
+ * carries a date leaves a mark on it, filled while the entry is still running.
+ *
+ * The order in the markup is the order of reading, not of the columns:
+ *   pair   a label and its value, as dt and dd (the parent must be a dl)
+ *   mark   a dated entry: the entry first, then its dates, so that a heading is heard
+ *          with its own dates and not with those of the entry before it
+ *   else   a label, then what it names
+ */
+interface Props {
+  /** lines of the left column */
+  label?: string | string[];
+  /** where it happened; printed under the dates */
+  place?: string;
+  /** the row is dated: `past` leaves an open mark, `current` a filled one */
+  mark?: 'past' | 'current';
+  /** a row of one line: less air under it */
+  tight?: boolean;
+  /** a label and its value: rendered as dt and dd */
+  pair?: boolean;
+}
+
+const { label = [], place, mark, tight = false, pair = false } = Astro.props;
+const lines = (Array.isArray(label) ? label : [label]).filter(Boolean);
+---
+
+{
+  pair ? (
+    <div class:list={['row', { 'is-tight': tight }]}>
+      <dt class="row-key machine">{lines.join(', ')}</dt>
+      <dd class="row-body">
+        <slot />
+      </dd>
+    </div>
+  ) : mark ? (
+    <div class:list={['row', 'has-mark', `is-${mark}`, { 'is-tight': tight }]}>
+      <div class="row-body">
+        <slot />
+      </div>
+      <div class="row-key machine">
+        {lines.map((line) => (
+          <p>{line}</p>
+        ))}
+        {place && <p class="row-place">{place}</p>}
+      </div>
+    </div>
+  ) : (
+    <div class:list={['row', { 'is-tight': tight }]}>
+      <div class="row-key machine">
+        {lines.map((line) => (
+          <p>{line}</p>
+        ))}
+      </div>
+      <div class="row-body">
+        <slot />
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .row {
+    --line: calc(var(--pad) + var(--cv-col, 168px) + var(--cv-gap, 36px) / 2);
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--cv-col, 168px) minmax(0, 1fr);
+    column-gap: var(--cv-gap, 36px);
+    align-items: baseline;
+    padding: 0 var(--pad) 30px;
+  }
+
+  .row.is-tight {
+    padding-bottom: 12px;
+    break-inside: avoid;
+  }
+
+  /* the time line: a border, so that it is printed even when backgrounds are not */
+  .row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--line);
+    border-left: 1px solid var(--rule-2);
+  }
+
+  /* the mark of a dated row */
+  .row.has-mark::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: calc(var(--line) - 3px);
+    width: 7px;
+    height: 7px;
+    border: 1px solid var(--ink);
+    background: var(--bond);
+    print-color-adjust: exact;
+  }
+
+  .row.is-current::after {
+    background: var(--ink);
+  }
+
+  /* the columns are named, because the markup does not follow them */
+  .row-key {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    gap: 3px;
+    color: var(--ink-2);
+  }
+
+  .row-place {
+    color: var(--ink-3);
+  }
+
+  .row-body {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    /* a word longer than the column (an address, three terms joined by slashes) is broken, not cut */
+    overflow-wrap: break-word;
+  }
+
+  /* Without room for two columns the date goes above its entry and the line moves to the
+     margin. On a screen only: a sheet of paper is narrower than this and keeps the form. */
+  @media screen and (max-width: 800px) {
+    .row {
+      --line: var(--pad);
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 6px;
+      padding-left: calc(var(--pad) + 18px);
+    }
+
+    .row.has-mark::after {
+      top: 3px;
+    }
+
+    .row-key {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px 14px;
+    }
+
+    .row-body {
+      grid-column: 1;
+      grid-row: 2;
+    }
+  }
+
+  @media print {
+    .row {
+      padding-bottom: 22px;
+    }
+
+    .row.is-tight {
+      padding-bottom: 10px;
+    }
+
+    .row::before {
+      border-left-color: var(--rule-3);
+    }
+  }
+</style>

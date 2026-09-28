@@ -1,0 +1,136 @@
+---
+/**
+ * Workbench. Exists only while running `npm run dev`:
+ *   /lab/board/?p=trajectories          one board program, full size
+ *   /lab/board/?p=clusters&still=1      its reduced-motion picture
+ *   /lab/board/?p=raft&at=12            the film as it stands after 12 seconds
+ *   /lab/archive/?cam=0                 the hall, camera at a given depth
+ *   /lab/archive/?cam=7.5&mode=band&open=306   framed as on an inner page, through an opening 306px tall
+ *   /lab/archive/?walk=2                the hall, walking to gate 2 (add &at=0.5 to freeze half way)
+ */
+import '../../styles/fonts.css';
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import '../../styles/chrome.css';
+
+export function getStaticPaths() {
+  return import.meta.env.DEV ? [{ params: { slug: 'board' } }, { params: { slug: 'archive' } }] : [];
+}
+const { slug } = Astro.params;
+---
+
+<html lang="en" class="js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Lab / {slug}</title>
+    <style is:global>
+      body {
+        margin: 0;
+      }
+      .lab {
+        padding: 16px;
+        display: grid;
+        gap: 8px;
+        justify-content: start;
+      }
+      .lab canvas {
+        width: var(--cw, 640px);
+        height: var(--ch, 360px);
+        outline: 1px solid var(--rule-2);
+        background: var(--board-paper);
+      }
+      .lab-hall {
+        position: fixed;
+        inset: 0;
+      }
+    </style>
+  </head>
+  <body>
+    {
+      slug === 'board' && (
+        <div class="lab">
+          <div id="name" class="machine" />
+          <canvas id="c" />
+          <div id="readout" class="machine" />
+        </div>
+      )
+    }
+    {
+      slug === 'archive' && (
+        <div class="hall lab-hall">
+          <canvas id="hall" />
+          <i id="open" style="position:absolute;left:0;top:0;width:1px;visibility:hidden" />
+          {['Publications', 'Notes', 'Projects', 'Life', 'CV'].map((name, i) => (
+            <a class="gate" href="#" data-gate={i}>
+              <span>
+                0{i + 1} {name}
+              </span>
+            </a>
+          ))}
+        </div>
+      )
+    }
+    <script>
+      import { createBoard } from '../../scripts/board/engine';
+      import { programs } from '../../scripts/board/registry';
+      import { createArchive } from '../../scripts/archive/scene';
+
+      const query = new URLSearchParams(location.search);
+      if (query.get('still')) {
+        const original = window.matchMedia.bind(window);
+        window.matchMedia = (q: string) =>
+          q.includes('prefers-reduced-motion')
+            ? ({ ...original(q), matches: true, addEventListener() {}, removeEventListener() {} } as unknown as MediaQueryList)
+            : original(q);
+      }
+
+      const boardCanvas = document.querySelector<HTMLCanvasElement>('#c');
+      if (boardCanvas) {
+        const key = query.get('p') || 'trajectories';
+        boardCanvas.style.setProperty('--cw', `${query.get('w') || 640}px`);
+        boardCanvas.style.setProperty('--ch', `${query.get('h') || 360}px`);
+        document.querySelector('#name')!.textContent = `program: ${key}`;
+        const board = createBoard(boardCanvas, {
+          programs,
+          onReadout: (text) => (document.querySelector('#readout')!.textContent = text),
+          onError: (k, error) => (document.querySelector('#readout')!.textContent = `ERROR in ${k}: ${error}`),
+        });
+        board.show(key, Number(query.get('at')) || 0);
+      }
+
+      const hall = document.querySelector<HTMLCanvasElement>('#hall');
+      if (hall) {
+        const depths = [18, 30, 42, 60, 84];
+        const labels = Array.from(document.querySelectorAll<HTMLElement>('[data-gate]'));
+        const probe = document.querySelector<HTMLElement>('#open')!;
+        if (query.get('open')) probe.style.height = `${query.get('open')}px`;
+        const mode = query.get('mode') === 'band' ? 'band' : 'room';
+        const archive = createArchive(hall, {
+          gates: depths.map((z, i) => ({ z, label: labels[i] })),
+          camera: Number(query.get('cam') || 0),
+          mode,
+          openings: { [mode]: probe },
+        });
+        const walk = query.get('walk');
+        if (walk !== null) {
+          const at = query.get('at');
+          if (at !== null) {
+            const from = archive.camera;
+            const to = depths[Number(walk)] - 14.5 + 4;
+            archive.stand(from + (to - from) * Number(at));
+          } else {
+            setTimeout(() => archive.walk(depths[Number(walk)] - 14.5 + 4), 400);
+          }
+        }
+        labels.forEach((label, i) =>
+          label.addEventListener('click', (event) => {
+            event.preventDefault();
+            archive.walk(depths[i] - 14.5 + 4).then(() => setTimeout(() => archive.walk(0), 500));
+          }),
+        );
+      }
+    </script>
+  </body>
+</html>

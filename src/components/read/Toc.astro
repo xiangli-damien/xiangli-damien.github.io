@@ -1,0 +1,124 @@
+---
+/**
+ * Contents of a document: its second- and third-level headings.
+ * The heading being read is marked as the page scrolls.
+ */
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+interface Props {
+  headings: Heading[];
+}
+const { headings } = Astro.props;
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+
+<nav class="toc" aria-label="Contents" data-toc>
+  <ol>
+    {
+      items.map((item) => (
+        <li class:list={[`is-h${item.depth}`]}>
+          <a class="plain" href={`#${item.slug}`}>
+            {item.text}
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .toc {
+    font-size: var(--t-typed-sm);
+    line-height: 1.35;
+  }
+
+  .toc li + li {
+    margin-top: 7px;
+  }
+
+  .toc .is-h2 {
+    font-weight: 700;
+  }
+
+  .toc .is-h2:not(:first-child) {
+    margin-top: 13px;
+  }
+
+  .toc .is-h3 {
+    padding-left: 14px;
+    color: var(--ink-2);
+  }
+
+  .toc a {
+    display: block;
+    border-left: 2px solid transparent;
+    margin-left: -10px;
+    padding-left: 8px;
+  }
+
+  .toc a:hover {
+    color: var(--red);
+  }
+
+  .toc a[aria-current='true'] {
+    border-left-color: var(--red);
+    color: var(--ink);
+  }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/page';
+
+  onPage((leaving) => {
+    const toc = document.querySelector<HTMLElement>('[data-toc]');
+    if (!toc || !('IntersectionObserver' in window)) return;
+    const links = new Map<string, HTMLAnchorElement>();
+    toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((link) => {
+      links.set(decodeURIComponent(link.hash.slice(1)), link);
+    });
+    const targets = [...links.keys()]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    const seen = new Set<string>();
+
+    const mark = () => {
+      // The current heading is the last one that has passed the top of the window.
+      let current: string | null = null;
+      for (const target of targets) {
+        if (target.getBoundingClientRect().top < 140) current = target.id;
+      }
+      current ??= targets.find((target) => seen.has(target.id))?.id ?? null;
+      links.forEach((link, id) => {
+        const on = id === current;
+        if (on) {
+          link.setAttribute('aria-current', 'true');
+          // Keep the current entry in sight inside the contents window. Only that box may
+          // scroll: scrolling the link into view would drag the whole page along.
+          const box = toc!.closest<HTMLElement>('.win-body');
+          if (box && box.scrollHeight > box.clientHeight) {
+            const top = link.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
+            if (top < box.scrollTop || top > box.scrollTop + box.clientHeight - 40) {
+              box.scrollTop = top - box.clientHeight / 2;
+            }
+          }
+        } else link.removeAttribute('aria-current');
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) seen.add(entry.target.id);
+          else seen.delete(entry.target.id);
+        }
+        mark();
+      },
+      { rootMargin: '-80px 0px -60% 0px' },
+    );
+    targets.forEach((target) => observer.observe(target));
+    leaving.addEventListener('abort', () => observer.disconnect());
+  });
+</script>
