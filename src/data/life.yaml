@@ -1,0 +1,10 @@
+# Text shown on the Life page next to the entries in src/content/life/.
+intro: A separate place for side writing that is not strictly academic.
+quickLinks: []
+notes:
+  - title: About this page
+    body: Misc collects useful materials that do not belong in Publications, Projects, or the main Blog.
+  - title: Chinese writing corner
+    body: This section is reserved for Chinese essays, side notes, and personal writing that should stay adjacent to—rather than inside—the academic blog.
+  - title: CV is only one part
+    body: The resume remains here, but this page is intentionally broader than a traditional CV page.

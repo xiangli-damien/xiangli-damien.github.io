@@ -1,0 +1,15 @@
+# News shown on the home screen bulletin. Newest entries are sorted to the top automatically.
+# To post an update, copy one block, change the date and the text. Markdown (**bold**, [links](url)) works.
+#
+#   - date: 2026-01          # YYYY-MM or YYYY-MM-DD
+#     text: "**Paper accepted** at ..."
+#     url: https://...       # optional: makes the whole line a link
+#     tag: PAPER             # optional short label (PAPER, TALK, TEACH, MOVE, ...)
+
+- date: 2025-12
+  tag: TEACH
+  text: "**TA**: Parallel Programming (MPCS 52060), UChicago"
+
+- date: 2025-03
+  tag: WORK
+  text: "**Research Intern** at Stony Brook University, advised by Prof. Jiawei Zhou"

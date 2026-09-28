@@ -1,0 +1,118 @@
+# The work board on the home screen. One entry = one channel.
+# The order here is the channel order. To add a work:
+#   1. copy a block and give it a new `id`
+#   2. pick a `program` (the animated drawing) from src/scripts/board/programs/
+#      or write a new one there and register it in src/scripts/board/registry.ts
+#
+# kind:     research | project | publication
+# short:    label on the channel key (keep it under ~10 characters)
+# question: optional one-line question shown as the headline
+# blurb:    one or two sentences. Markdown (**bold**) is allowed.
+# href:     optional link to the page with full details
+
+- id: trajectories
+  kind: research
+  title: Geometry-based trajectory analysis
+  short: TRAJECTORY
+  year: 2025–
+  question: What can we learn from hidden-state trajectories?
+  blurb: >-
+    Predict correctness from hidden-state trajectories—no ground-truth labels.
+    I treat hidden-state trajectories as **high-dimensional geometry** and design compact
+    metrics to detect anomaly signatures (e.g., hallucination vs. correct reasoning).
+  program: trajectories
+  href: /cv/#experience
+
+- id: clusters
+  kind: research
+  title: Unsupervised cluster-as-lens
+  short: CLUSTER
+  year: 2025–
+  question: How to study more about model internals?
+  blurb: >-
+    Track concept formation via split/merge transitions across layers.
+    Layer-wise clustering reveals **emergence / splitting / merging** of representation
+    groups—useful for safety checks, hallucination detection, and editing.
+  program: clusters
+  href: /cv/#experience
+
+- id: cell-recognition
+  kind: project
+  title: End-to-end Cell Recognition via BERT-style Translation
+  short: CELLS
+  year: "2025"
+  blurb: >-
+    3D point clouds represented as token sequences and translated directly to cell identities
+    by a BERT-style encoder-decoder, with masked point modeling and contrastive pretraining.
+    AUROC > 0.85 at ~1ms per cell.
+  program: cells
+  href: /projects/#cell-recognition
+
+- id: raft-message-queue
+  kind: project
+  title: Raft Message Queue (RMQ)
+  short: RAFT
+  year: "2024"
+  blurb: >-
+    A distributed message queue built on the Raft consensus algorithm: leader election,
+    fault-tolerant log replication, and ordered delivery under network partitions.
+  program: raft
+  href: /projects/#raft-message-queue
+  links:
+    - label: Code
+      href: https://github.com/xli0808/RaftMessageQueue
+
+- id: chicago-crime
+  kind: project
+  title: Chicago Crime Big Data Application
+  short: CHICAGO
+  year: "2024"
+  blurb: >-
+    A big data platform over Chicago crime records: ETL pipelines with Hive and Scala,
+    batch aggregation and real-time analytics on distributed infrastructure.
+  program: city
+  href: /projects/#chicago-crime
+
+- id: netty-rpc
+  kind: project
+  title: Netty-Spring-ZK RPC Framework
+  short: RPC
+  year: "2023"
+  blurb: >-
+    A lightweight RPC framework: Netty for NIO transport, ZooKeeper for service discovery,
+    custom codec, load balancing, heartbeats, and token-bucket flow control.
+  program: rpc
+  href: /projects/#netty-rpc
+
+- id: msh-lite-shell
+  kind: project
+  title: msh - Lite Shell
+  short: SHELL
+  year: "2023"
+  blurb: >-
+    A Linux shell in C: fork/exec, signal handling for SIGINT/SIGTSTP, foreground and
+    background job control, history, and redirection.
+  program: shell
+  href: /projects/#msh-lite-shell
+
+- id: ed-forecasting
+  kind: research
+  title: Time-series forecasting of emergency department visits
+  short: FORECAST
+  year: 2022–23
+  blurb: >-
+    Emergency-department visits joined with weather, air-quality, and COVID-19 data.
+    Of 10+ benchmarked models a hybrid **VMD-LSTM** performed best (MAPE 5.29%, RMSE 51.89).
+  program: forecast
+  href: /cv/#experience
+
+- id: ed-staff-dispatch
+  kind: publication
+  title: Optimization of emergency medical staff regional dispatch considering the ratio of doctors and nurses
+  short: DISPATCH
+  year: "2022"
+  blurb: >-
+    Optimization of regional dispatch strategies under doctor–nurse ratio constraints.
+    Published at ISAIMS 2022.
+  program: dispatch
+  href: /pubs/#ed-staff-dispatch-2022

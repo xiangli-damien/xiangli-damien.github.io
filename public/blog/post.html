@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moved · Xiang Li</title>
+<meta name="robots" content="noindex">
+<style>body{font:16px/1.5 "Courier New",Courier,monospace;background:#f3eee0;color:#1c1b19;padding:2rem}a{color:#1c1b19}</style>
+<script>
+  // Old links looked like /blog/post.html?slug=reading-list
+  (function () {
+    var slug = new URLSearchParams(location.search).get('slug') || '';
+    slug = slug.replace(/[^A-Za-z0-9_-]/g, '');
+    location.replace(slug ? '/blog/' + slug + '/' : '/blog/');
+  })();
+</script>
+</head>
+<body>
+<p>Notes have moved to <a href="/blog/">/blog/</a>.</p>
+</body>
+</html>

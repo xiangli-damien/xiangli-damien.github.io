@@ -1,0 +1,73 @@
+# Who you are. Shown in the identity window on the home screen and reused across the site.
+name: Xiang Li
+tagline: ""
+affiliation: Research Intern @ Stony Brook University
+location: Chicago, IL
+timezone: America/Chicago
+email: xiang.li.13@stonybrook.edu
+
+# Key / value facts listed under the portrait.
+quickFacts:
+  - k: Research
+    v: Mechanistic Interpretability & Trustworthy AI
+
+# Leave a link empty ("") to hide it.
+links:
+  cv: /assets/cv/Xiang_Li_Resume.pdf
+  github: ""
+  scholar: ""
+  twitter: ""
+  linkedin: https://www.linkedin.com/in/xiangli-damien/
+
+# Portraits live in src/assets/portraits/. Click cycles through `illustrations`,
+# hovering shows `photo`.
+portraits:
+  fallback: avatar-ai-1.svg
+  photo: xiangli-3.jpg
+  illustrations:
+    - xiangli-bluesketch.png
+    - xiangli-clay.png
+    - xiangli-alien.png
+    - xiangli-pearl.png
+    - xiangli-robot.png
+    - xiangli-kongfu.png
+    - xiangli-rock.png
+
+# The introduction. Markdown is allowed.
+about: |
+  Hi — I'm **Xiang Li**.
+
+  I build tools to see inside AI — so we can trust **what it thinks**, not just what it says.
+
+  I'm currently a research intern at Stony Brook University, fortunate to be advised by [Prof. Jiawei Zhou](https://joezhouai.com/). I got my M.S. from University of Chicago, and my B.S. from Sichuan University, where I was advised by [Prof. Ta-Ping Lu](https://scupi.scu.edu.cn/en/faculty-staff-en/faculty-en/robert-lu).
+
+# Research themes (also used by the first two channels of the work board).
+researchThemes:
+  - key: trajectories
+    title: Geometry-based trajectory analysis
+    oneLiner: Predict correctness from hidden-state trajectories—no ground-truth labels.
+    question: What can we learn from hidden-state trajectories?
+    details: >-
+      I treat hidden-state trajectories as **high-dimensional geometry** and design compact
+      metrics to detect anomaly signatures (e.g., hallucination vs. correct reasoning).
+  - key: clusters
+    title: Unsupervised cluster-as-lens
+    oneLiner: Track concept formation via split/merge transitions across layers.
+    question: How to study more about model internals?
+    details: >-
+      Layer-wise clustering reveals **emergence / splitting / merging** of representation
+      groups—useful for safety checks, hallucination detection, and editing.
+
+featuredWork:
+  title: How to explore trajectories within model internals
+  status: Anonymous ACL submission
+  links:
+    Transformer: https://arxiv.org/abs/1706.03762
+    AUROC: https://en.wikipedia.org/wiki/Receiver_operating_characteristic
+    ACL Anthology: https://aclanthology.org/
+
+# Footer lines.
+motto: We are not what happened to us. We are what we choose to become.
+credit: 95% designed by Xiang Li, with reference to nanjiang.
+creditUrl: https://www.nanjiangwill.com/
+copyright: © Xiang Li. All rights reserved.

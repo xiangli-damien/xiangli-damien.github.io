@@ -1,8 +1,13 @@
 ---
-title: "Reading List"
-summary: "Curated and gradually updated reading list."
-date: "2025-03-09"
-slug: reading-list
+title: Reading List
+summary: Curated and gradually updated reading list.
+date: 2025-03-09
+category: reading
+tags: [reading, papers, research]
+lang: en
+cover: ../../../assets/figures/readinglist.jpg
+coverAlt: Reading list
+readingMinutes: 20
 ---
 
 ## 1. Foundation Models
@@ -644,6 +649,6 @@ How to know if the model is correct: self-assessment, uncertainty quantification
 
 
 > Reference:
-> - [Post-DeepSeek-R1_LLM-RL Reading List]([https://github.com/jzhou316/Post-DeepSeek-R1_LLM-RL](https://github.com/jzhou316/Post-DeepSeek-R1_LLM-RL))
+> - [Post-DeepSeek-R1_LLM-RL Reading List](https://github.com/jzhou316/Post-DeepSeek-R1_LLM-RL)
 > - [Foundations and Frontiers of Large Language Models Readings](https://joezhouai.com/llm-course-26/)
 
