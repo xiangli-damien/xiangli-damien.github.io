@@ -1,0 +1,341 @@
+---
+/**
+ * The work board: one work at a time, drawn live, with keys to change the channel.
+ * Channels are listed in src/data/board.yaml.
+ */
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import { getChannels } from '../../lib/content';
+import { programs } from '../../scripts/board/registry';
+
+const processor = await createMarkdownProcessor({ syntaxHighlight: false });
+const channels = await Promise.all(
+  (await getChannels()).map(async (channel, index) => {
+    // A misspelt drawing must stop the build, not quietly show another work's drawing.
+    if (!(channel.data.program in programs)) {
+      throw new Error(
+        `src/data/board.yaml: "${channel.data.id}" asks for the drawing "${channel.data.program}", which does not exist. ` +
+          `Known drawings: ${Object.keys(programs).join(', ')}.`,
+      );
+    }
+    const { code } = await processor.render(channel.data.blurb);
+    return { ...channel.data, no: String(index + 1).padStart(2, '0'), html: code };
+  }),
+);
+const first = channels[0];
+---
+
+<div class="board" data-board data-channels={JSON.stringify(channels)}>
+  <div class="board-screen">
+    <canvas data-board-canvas role="img" aria-label={`Drawing: ${first.title}`}></canvas>
+  </div>
+
+  <div class="board-caption" aria-live="polite">
+    <p class="machine board-kind">
+      <span data-board-no>{first.no}</span>
+      <span data-board-short>{first.short}</span>
+      <span data-board-kind>{first.kind}</span>
+      <span data-board-year>{first.year}</span>
+    </p>
+    <h3 class="head-2" data-board-title>{first.title}</h3>
+    <p class="board-question" data-board-question hidden={!first.question}>{first.question}</p>
+    <div class="typed board-blurb" data-board-blurb set:html={first.html} />
+    <p class="board-links machine" data-board-links>
+      {
+        first.href && (
+          <a href={first.href}>Details</a>
+        )
+      }
+      {
+        first.links.map((link) => (
+          <a href={link.href} target="_blank" rel="noopener">
+            {link.label}
+          </a>
+        ))
+      }
+    </p>
+  </div>
+
+  <div class="board-keys" role="tablist" aria-label="Works">
+    {
+      channels.map((channel, index) => (
+        <button
+          type="button"
+          role="tab"
+          class="board-key machine"
+          aria-selected={index === 0 ? 'true' : 'false'}
+          tabindex={index === 0 ? 0 : -1}
+          data-board-key={index}
+          title={`${channel.short}: ${channel.title}`}
+        >
+          <span aria-hidden="true">{channel.no}</span>
+          <span class="sr-only">{channel.title}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <noscript>
+    <!-- Without scripts nothing is drawn and the keys do nothing: list the works instead. -->
+    <ol class="board-list typed">
+      {
+        channels.map((channel) => (
+          <li>
+            <span class="machine">
+              {channel.no} {channel.kind} {channel.year}
+            </span>
+            {channel.href ? <a href={channel.href}>{channel.title}</a> : channel.title}
+          </li>
+        ))
+      }
+    </ol>
+  </noscript>
+</div>
+
+<style>
+  .board-screen {
+    position: relative;
+    border-bottom: 1px solid var(--ink);
+    background: var(--board-paper);
+  }
+
+  .board-screen canvas {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    touch-action: pan-y;
+  }
+
+  .board-caption {
+    padding: 14px var(--pad) 14px;
+    min-height: 178px;
+  }
+
+  .board-kind {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    margin-bottom: 8px;
+    color: var(--ink-3);
+  }
+
+  .board-kind [data-board-no] {
+    color: var(--red);
+  }
+
+  .board-kind [data-board-short] {
+    color: var(--ink);
+  }
+
+  .board-question {
+    margin-top: 5px;
+    font-style: italic;
+    color: var(--ink-2);
+  }
+
+  .board-blurb {
+    margin-top: 8px;
+    font-size: var(--t-typed-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .board-blurb :global(* + *) {
+    margin-top: 0.6em;
+  }
+
+  .board-blurb :global(ul),
+  .board-blurb :global(ol) {
+    padding-left: 1.4em;
+    list-style: revert;
+  }
+
+  .board-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+  }
+
+  .board-links:empty {
+    display: none;
+  }
+
+  .board-keys {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
+    border-top: 1px solid var(--ink);
+  }
+
+  .board-key {
+    height: 30px;
+    border-left: 1px solid var(--rule-2);
+    color: var(--ink-3);
+    text-transform: uppercase;
+  }
+
+  .board-key:first-child {
+    border-left: 0;
+  }
+
+  .board-key:hover {
+    color: var(--ink);
+    background: var(--paper-2);
+  }
+
+  .board-key[aria-selected='true'] {
+    background: var(--ink);
+    color: var(--bond);
+  }
+
+  .board-key:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .board-list {
+    padding: 12px var(--pad) 16px;
+    border-top: 1px solid var(--ink);
+  }
+
+  .board-list li {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 12px;
+    padding: 4px 0;
+  }
+
+  .board-list .machine {
+    padding-top: 4px;
+    color: var(--ink-3);
+  }
+</style>
+
+<script>
+  import { onPage } from '../../scripts/page';
+  import { createBoard } from '../../scripts/board/engine';
+  import { programs } from '../../scripts/board/registry';
+
+  interface Channel {
+    id: string;
+    no: string;
+    short: string;
+    kind: string;
+    year: string;
+    title: string;
+    question?: string;
+    html: string;
+    program: string;
+    href?: string;
+    links: { label: string; href: string }[];
+  }
+
+  onPage((leaving) => {
+    const root = document.querySelector<HTMLElement>('[data-board]');
+    const canvas = root?.querySelector<HTMLCanvasElement>('[data-board-canvas]');
+    if (!root || !canvas) return;
+    const channels: Channel[] = JSON.parse(root.dataset.channels || '[]');
+    const keys = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-board-key]'));
+    const part = (name: string) => root.querySelector<HTMLElement>(`[data-board-${name}]`)!;
+    // The read-out is printed in the status bar of the window the board sits in.
+    const readout =
+      root.closest('.win')?.querySelector<HTMLElement>('[data-board-readout]') ?? document.createElement('span');
+    let current = 0;
+
+    const board = createBoard(canvas, {
+      programs,
+      onReadout: (text) => {
+        if (readout.textContent !== text) readout.textContent = text;
+      },
+      onError: () => {
+        readout.textContent = 'NO SIGNAL';
+      },
+    });
+    leaving.addEventListener('abort', () => board.destroy());
+
+    function show(index: number, focus = false) {
+      const channel = channels[index];
+      if (!channel) return;
+      current = index;
+      keys.forEach((key, i) => {
+        const on = i === index;
+        key.setAttribute('aria-selected', String(on));
+        key.tabIndex = on ? 0 : -1;
+        if (on && focus) key.focus();
+      });
+      part('no').textContent = channel.no;
+      part('short').textContent = channel.short;
+      part('kind').textContent = channel.kind;
+      part('year').textContent = channel.year;
+      part('title').textContent = channel.title;
+      const question = part('question');
+      question.textContent = channel.question ?? '';
+      question.hidden = !channel.question;
+      part('blurb').innerHTML = channel.html;
+      const links = part('links');
+      links.replaceChildren();
+      if (channel.href) {
+        const a = document.createElement('a');
+        a.href = channel.href;
+        a.textContent = 'Details';
+        links.append(a);
+      }
+      for (const link of channel.links) {
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = link.label;
+        links.append(a);
+      }
+      canvas!.setAttribute('aria-label', `Drawing: ${channel.title}`);
+      readout.textContent = channel.short;
+      board.show(channel.program);
+    }
+
+    keys.forEach((key, index) => {
+      key.addEventListener('click', () => show(index));
+    });
+
+    // Arrow keys, Home and End move along the keys; the figures 1 to 9 choose a work directly.
+    root.addEventListener('keydown', (event) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if ((event.target as HTMLElement).closest('a, input, textarea, select')) return;
+      const onKeys = (event.target as HTMLElement).closest('[data-board-key]') !== null;
+      let next = -1;
+      if (/^[1-9]$/.test(event.key)) next = Number(event.key) - 1;
+      else if (!onKeys) return;
+      else if (event.key === 'ArrowRight') next = (current + 1) % channels.length;
+      else if (event.key === 'ArrowLeft') next = (current - 1 + channels.length) % channels.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = channels.length - 1;
+      if (next < 0 || next >= channels.length) return;
+      event.preventDefault();
+      show(next, true);
+    });
+
+    // A link such as /#work=raft opens the board on that work, and brings the board into view.
+    function fromAddress(): number {
+      const wanted = new URLSearchParams(location.hash.slice(1)).get('work');
+      if (!wanted) return -1;
+      return channels.findIndex((channel) => channel.id === wanted || channel.program === wanted);
+    }
+    function reveal() {
+      // The desk opens, unrolls and scrolls to the window; without a desk, scroll to the board.
+      requestAnimationFrame(() => {
+        root!.dispatchEvent(new CustomEvent('desk:open', { detail: 'board', bubbles: true }));
+        root!.scrollIntoView({ block: 'nearest' });
+      });
+    }
+    window.addEventListener(
+      'hashchange',
+      () => {
+        const index = fromAddress();
+        if (index < 0) return;
+        show(index);
+        reveal();
+      },
+      { signal: leaving },
+    );
+
+    const asked = fromAddress();
+    show(Math.max(0, asked));
+    if (asked >= 0) reveal();
+  });
+</script>
