@@ -31,3 +31,16 @@ build/
 
 # Python
 __pycache__/
+
+# Local authoring and generated output
+node_modules/
+.drafts/
+.studio/
+*.tmp
+
+# Astro
+.astro/
+public/media/_auto/
+
+# Local snapshot of the pre-redesign site
+.archive/
