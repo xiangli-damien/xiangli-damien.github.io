@@ -78,6 +78,12 @@ Use `python build.py --watch` for auto-rebuild (requires `watchdog`).
 
 Push to `xiangli-damien.github.io` on `main`. GitHub Pages serves it automatically.
 
+## Redesign in progress
+
+A redesign of the site is being worked on in the branch
+[`redesign/archive`](https://github.com/xiangli-damien/xiangli-damien.github.io/tree/redesign/archive).
+It is not published: the site online is still built from `main`.
+
 ## License
 
 © Xiang Li. All rights reserved. 95% designed by Xiang Li, with reference to [nanjiang](https://www.nanjiangwill.com/).
