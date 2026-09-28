@@ -1,0 +1,48 @@
+---
+/**
+ * The hall: the drawing of the archive, with one link per gate.
+ *
+ * There is one hall, and it stays while the pages are exchanged in front of it
+ * (`transition:persist`). It is the same on every page: where the visitor stands, and how
+ * much of the hall shows above the page, follow from `data-hall-key` and `data-mode` on <html>
+ * (see Room.astro, chrome.css and src/scripts/archive/hall.ts).
+ */
+import { GATES, HALLS, type HallKey } from '../../lib/content';
+
+const halls = (Object.keys(HALLS) as HallKey[]).map((key) => ({
+  key,
+  href: HALLS[key].href,
+  depth: HALLS[key].depth,
+}));
+---
+
+<div
+  class="hall"
+  data-hall
+  data-halls={JSON.stringify(halls)}
+  role="navigation"
+  aria-label="Halls of the archive"
+  transition:persist="hall"
+>
+  <canvas aria-hidden="true"></canvas>
+  {/* as tall as the part of the hall that shows above the page, on the entrance and further in */}
+  <i class="hall-opening is-room" data-opening="room" aria-hidden="true"></i>
+  <i class="hall-opening is-band" data-opening="band" aria-hidden="true"></i>
+  <p class="hall-note hand" aria-hidden="true">
+    <svg viewBox="0 0 58 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M56 30C40 36 22 30 12 8"></path>
+      <path d="M57 28.6C41 35 24 28 13.4 9.4" opacity=".55"></path>
+      <path d="M3.5 17.5 11.6 6.4l8.2 8.4"></path>
+    </svg>
+    walk in
+  </p>
+  {
+    GATES.map((gate) => (
+      <a class="gate" href={gate.href} data-gate data-gate-depth={gate.depth}>
+        <span>
+          {gate.no} {gate.title}
+        </span>
+      </a>
+    ))
+  }
+</div>

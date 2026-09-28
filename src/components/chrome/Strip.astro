@@ -1,0 +1,107 @@
+---
+/**
+ * The system strip: the owner's name, the halls, pull-down menus, the clock.
+ *
+ * The halls are listed here at all times, in the order in which they stand along the
+ * corridor: gates that have been walked past cannot be seen in the drawing any more.
+ * A mark under the list shows how far in the visitor stands, and moves during a walk
+ * (src/scripts/archive/hall.ts). Where there is no room for the list, the Go menu holds it.
+ */
+import { profile } from '../../lib/data';
+import { GATES, HALLS, type HallKey } from '../../lib/content';
+
+interface Props {
+  hall: HallKey;
+  /** the page has a desk of movable windows */
+  desk?: boolean;
+}
+
+const { hall, desk = false } = Astro.props;
+const city = profile.location.split(',')[0];
+const path = Astro.url.pathname.replace(/\/?$/, '/');
+/** `page` on the front page of a hall, `true` on a page further inside it. */
+const current = (key: string, href: string) => (key !== hall ? undefined : path === href ? 'page' : 'true');
+---
+
+<header class="strip" data-strip>
+  <a class="strip-mark" href="/" data-stop="0" aria-label={`${profile.name}, entrance`}>
+    <i aria-hidden="true"></i>
+    <span>{profile.name}</span>
+  </a>
+
+  <nav class="strip-halls" aria-label="Halls">
+    {
+      GATES.map((gate) => (
+        <a href={gate.href} data-stop={gate.depth} aria-current={current(gate.key, gate.href)}>
+          <span class="strip-no">{gate.no}</span> {gate.title}
+        </a>
+      ))
+    }
+  </nav>
+
+  <nav class="strip-menus" aria-label="Site">
+    <div class="menu is-go" data-menu>
+      <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="menu-go">Go</button>
+      <ul class="menu-list" id="menu-go" data-menu-list hidden>
+        {
+          Object.entries(HALLS).map(([key, item]) => (
+            <li>
+              <a href={item.href} aria-current={current(key, item.href)}>
+                <span class="menu-no">{item.no}</span>
+                <span>{item.title}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="menu" data-menu>
+      <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="menu-view">View</button>
+      <ul class="menu-list" id="menu-view" data-menu-list hidden>
+        <li>
+          <button type="button" aria-pressed="true" data-set-theme="paper" data-keep-open>Daylight</button>
+        </li>
+        <li>
+          <button type="button" aria-pressed="false" data-set-theme="dusk" data-keep-open>After hours</button>
+        </li>
+        {desk && <li class="menu-rule" role="separator" />}
+        {
+          desk && (
+            <li>
+              <button type="button" data-desk-reset>
+                Tidy the desk
+              </button>
+            </li>
+          )
+        }
+        <li class="menu-rule" role="separator"></li>
+        <li><a href="/rss.xml" data-astro-reload>Notes feed (RSS)</a></li>
+      </ul>
+    </div>
+
+    {
+      desk && (
+        <div class="menu" data-menu>
+          <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="menu-windows">
+            Windows
+          </button>
+          <ul class="menu-list" id="menu-windows" data-menu-list data-desk-windows hidden />
+        </div>
+      )
+    }
+
+    <button class="menu-button" type="button" data-open-finder aria-keyshortcuts="Control+K" title="Find (Ctrl K)">Find</button>
+  </nav>
+
+  <div class="strip-right">
+    <span class="is-wide" title="Distance from the entrance">
+      Depth <b data-depth>{String(Math.round(HALLS[hall].depth ? HALLS[hall].depth + 4 : 14.5)).padStart(3, '0')}</b> m
+    </span>
+    <span title={`Local time in ${profile.location}`}>
+      <span class="strip-city">{city}</span> <b><time data-clock data-zone={profile.timezone}>--:--</time></b>
+    </span>
+  </div>
+
+  <i class="strip-marker" data-marker hidden aria-hidden="true"></i>
+</header>

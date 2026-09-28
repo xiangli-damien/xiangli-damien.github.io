@@ -1,0 +1,127 @@
+---
+/**
+ * The frame every page is drawn in: system strip, the hall, the page, the colophon.
+ *
+ * Pages are exchanged without loading the document again (<ClientRouter />), so that the
+ * hall can stay where it is and the walk from one section to the next is never cut.
+ * Scripts that set a page up therefore go through onPage (src/scripts/page.ts).
+ */
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/chrome.css';
+import '../styles/kit.css';
+import '../styles/page.css';
+
+import { ClientRouter } from 'astro:transitions';
+import Strip from '../components/chrome/Strip.astro';
+import Hall from '../components/chrome/Hall.astro';
+import Finder from '../components/chrome/Finder.astro';
+import { profile } from '../lib/data';
+import { HALLS, type HallKey } from '../lib/content';
+
+interface Props {
+  hall: HallKey;
+  /** page title; the owner's name is appended */
+  title?: string;
+  description?: string;
+  /** social preview image (absolute or site-relative URL) */
+  image?: string;
+  /** set on pages that must not be indexed */
+  noindex?: boolean;
+  lang?: string;
+  /** the page has a desk of movable windows; by default the entrance has one */
+  desk?: boolean;
+  /** a name for the page, for the few rules that apply to one page only (`data-page` on <html>) */
+  page?: string;
+}
+
+const {
+  hall,
+  title,
+  description = `${profile.name} - ${profile.quickFacts[0]?.v ?? ''}. ${profile.affiliation}.`,
+  image,
+  noindex = false,
+  lang = 'en',
+  desk = hall === 'home',
+  page,
+} = Astro.props;
+
+const here = HALLS[hall];
+const entrance = hall === 'home';
+const pageTitle = title ? `${title} · ${profile.name}` : profile.name;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const social = image ? new URL(image, Astro.site).href : undefined;
+---
+
+<!doctype html>
+<html lang={lang} data-theme="paper" data-hall-key={hall} data-mode={entrance ? 'room' : 'band'} data-page={page}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={profile.name} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f6f3ec" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${profile.name} - Notes`} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {social && <meta property="og:image" content={social} />}
+    <meta name="twitter:card" content={social ? 'summary_large_image' : 'summary'} />
+    <script is:inline>
+      // Runs before the first paint.
+      (function () {
+        var root = document.documentElement;
+        // Styles that depend on the scripts being there (the gates are placed by one) key off this.
+        root.classList.add('js');
+        try {
+          // The saved theme. The site never goes dark by itself.
+          // An address ending in ?theme=dusk or ?theme=paper shows that theme without saving it.
+          var asked = new URLSearchParams(location.search).get('theme');
+          var saved = asked || localStorage.getItem('theme');
+          if (saved === 'dusk' || saved === 'paper') root.dataset.theme = saved;
+        } catch (e) {}
+      })();
+    </script>
+    <ClientRouter />
+    <slot name="head" />
+  </head>
+  <body data-hall-no={here.no}>
+    <a class="skip" href="#page">Skip to the page</a>
+    <Strip hall={hall} desk={desk} />
+    <Hall />
+    <main id="page" tabindex="-1">
+      <slot />
+    </main>
+    <footer class="colophon">
+      <q>{profile.motto}</q>
+      <span>
+        {profile.credit.replace(/nanjiang\.?$/, '')}<a href={profile.creditUrl} target="_blank" rel="noopener" class="plain under"
+          >nanjiang</a
+        >. {profile.copyright}
+      </span>
+    </footer>
+    <Finder />
+    <script>
+      import { onPage } from '../scripts/page';
+      import { createDesk } from '../scripts/desk/wm';
+      import { initShell } from '../scripts/desk/shell';
+      import { initHall } from '../scripts/archive/hall';
+
+      initHall();
+      onPage((leaving) => {
+        const root = document.querySelector<HTMLElement>('[data-desk]');
+        const desk = root ? createDesk(root, leaving) : null;
+        initShell(desk, leaving);
+      });
+    </script>
+  </body>
+</html>
