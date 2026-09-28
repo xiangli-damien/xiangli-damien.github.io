@@ -1,0 +1,26 @@
+/*
+ * FACES
+ * All fonts are served from this site; nothing is fetched from a font CDN.
+ *   Doto             © The Doto Project Authors, SIL Open Font License 1.1
+ *   Departure Mono   © Helena Zhang, SIL OFL 1.1 (src/assets/fonts/departure-mono/LICENSE.txt)
+ *   Courier Prime    © Quote-Unquote Apps, SIL OFL 1.1
+ *   Reenie Beanie    © James Grieshaber, SIL OFL 1.1
+ */
+@import '@fontsource-variable/doto/full.css';
+@import '@fontsource/courier-prime/latin-400.css';
+@import '@fontsource/courier-prime/latin-400-italic.css';
+@import '@fontsource/courier-prime/latin-700.css';
+@import '@fontsource/courier-prime/latin-700-italic.css';
+@import '@fontsource/courier-prime/latin-ext-400.css';
+@import '@fontsource/courier-prime/latin-ext-700.css';
+@import '@fontsource/reenie-beanie/latin-400.css';
+
+@font-face {
+  font-family: 'Departure Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url('../assets/fonts/departure-mono/DepartureMono-Regular.woff2') format('woff2'),
+    url('../assets/fonts/departure-mono/DepartureMono-Regular.woff') format('woff');
+}

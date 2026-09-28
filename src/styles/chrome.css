@@ -1,0 +1,962 @@
+/*
+ * CHROME
+ * The system strip, the hall behind everything, and the windows that stand in it.
+ *
+ * The hall is drawn by hand; the windows are ruled by machine. Keeping the two apart is
+ * the whole idea, so windows get exact hairlines, square corners and hard shadows,
+ * and nothing in them wobbles.
+ */
+
+/* ---------- system strip ---------- */
+
+.strip {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: stretch;
+  height: var(--strip);
+  padding: 0 8px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  -webkit-font-smoothing: none;
+}
+
+.strip a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.strip-mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 0 8px;
+  white-space: nowrap;
+}
+
+.strip-mark i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.strip-menus {
+  display: flex;
+  align-items: stretch;
+}
+
+/* the halls, in the order in which they stand along the corridor */
+.strip-halls {
+  display: flex;
+  align-items: stretch;
+  margin-right: 10px;
+  padding-right: 10px;
+  border-right: 1px solid var(--rule-2);
+}
+
+.strip-halls a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.strip-halls a:hover,
+.strip-halls a[aria-current] {
+  color: var(--ink);
+}
+
+.strip-halls a:hover .strip-no,
+.strip-halls a[aria-current] .strip-no {
+  color: var(--red);
+}
+
+/* how far into the hall the visitor stands: it slides along under the list during a walk */
+.strip-marker {
+  position: absolute;
+  left: -9px;
+  bottom: -1px;
+  width: 18px;
+  height: 3px;
+  background: var(--red);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.strip-marker[hidden] {
+  display: none;
+}
+
+/* with the list in the strip, the menu that holds the same list is not needed */
+.menu.is-go {
+  display: none;
+}
+
+@media (max-width: 899px) {
+  .strip-halls,
+  .strip-marker {
+    display: none;
+  }
+  .menu.is-go {
+    display: flex;
+  }
+}
+
+@media (max-width: 1099px) {
+  .strip-right .is-wide {
+    display: none;
+  }
+}
+
+.strip-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding-right: 8px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.strip-right b {
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.menu {
+  position: relative;
+  display: flex;
+}
+
+.menu-button {
+  padding: 0 11px;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  line-height: 1;
+}
+
+.menu-button:hover,
+.menu-button[aria-expanded='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.menu-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 224px;
+  margin: 0;
+  padding: 4px 0;
+  background: var(--bond);
+  border: 1px solid var(--ink);
+  box-shadow: 3px 3px 0 0 var(--ink);
+}
+
+.menu-list a,
+.menu-list button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 14px 7px 28px;
+  text-align: left;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  line-height: 1.2;
+}
+
+.menu-list a:hover,
+.menu-list button:hover,
+.menu-list a:focus-visible,
+.menu-list button:focus-visible {
+  background: var(--ink);
+  color: var(--bond);
+  outline: none;
+}
+
+.menu-list [aria-pressed='true']::before,
+.menu-list [aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.menu-list .menu-no {
+  color: var(--ink-3);
+}
+
+.menu-list .menu-key {
+  margin-left: auto;
+  color: var(--ink-3);
+}
+
+.menu-list a:hover .menu-no,
+.menu-list a:hover .menu-key,
+.menu-list button:hover .menu-key,
+.menu-list a:focus-visible .menu-no,
+.menu-list button:focus-visible .menu-key {
+  color: inherit;
+}
+
+.menu-rule {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--rule-2);
+}
+
+@media (max-width: 640px) {
+  .strip-right .is-wide {
+    display: none;
+  }
+  .menu-button {
+    padding: 0 9px;
+  }
+}
+
+/* On a phone a menu hangs from the strip, not from its button, so it cannot run off the screen. */
+@media (max-width: 480px) {
+  .menu {
+    position: static;
+  }
+  .menu-list {
+    left: 8px;
+    min-width: 0;
+    width: min(224px, calc(100vw - 16px));
+  }
+  .strip-right {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .strip-city {
+    display: none;
+  }
+}
+
+@media (max-width: 340px) {
+  .strip-right {
+    display: none;
+  }
+}
+
+/* ---------- the hall ---------- */
+
+/*
+ * The hall is one place. It stands behind the page and does not move; pages are sheets
+ * that are fed up in front of it and leave its upper part open. How much is left open
+ * depends on the page: most of the screen on the entrance, a band across the top further in.
+ */
+:root {
+  --open-band: clamp(220px, 34vh, 340px);
+  --open-room: min(62vh, 560px);
+  --hall-h: var(--open-room);
+  --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+/* Room for windows beside the hall: on the entrance the hall is the whole room. */
+@media (min-width: 1200px) and (pointer: fine) {
+  :root {
+    --hall-h: calc(100vh - var(--strip));
+    --open-room: var(--hall-h);
+  }
+}
+
+.hall {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 0 26px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink);
+  /* the drawing is decoration for anyone who cannot see it; the links inside are not */
+}
+
+.hall canvas,
+.hall-note,
+.hall-opening {
+  display: none;
+}
+
+.js .hall {
+  position: fixed;
+  z-index: 0;
+  top: var(--strip);
+  left: 0;
+  right: 0;
+  height: var(--hall-h);
+  padding: 0;
+  border: 0;
+}
+
+.js .hall canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.js .hall-opening {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.hall-opening.is-room {
+  height: var(--open-room);
+}
+
+.hall-opening.is-band {
+  height: var(--open-band);
+}
+
+/*
+ * A gate is a link. With the scripts running it is laid over its gate in the drawing;
+ * without them the gates are simply listed, one under the other.
+ */
+.gate {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: max-content;
+  margin: 8px auto 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.gate > span {
+  font-family: var(--f-dots);
+  font-weight: 700;
+  font-size: 22px;
+  font-variation-settings: 'ROND' 100;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.js .gate {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--gate-w, 0);
+  height: var(--gate-h, 0);
+  margin: 0;
+  visibility: hidden;
+  will-change: transform;
+}
+
+/* the words stand on the part of the lintel that can be seen */
+.js .gate > span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--band-h, 0);
+  display: grid;
+  place-items: center;
+  font-size: var(--gate-size, 12px);
+  line-height: 1;
+  opacity: var(--gate-alpha, 1);
+}
+
+.gate:hover,
+.gate:focus-visible {
+  color: var(--red);
+  text-decoration: none;
+}
+
+.js .gate:hover > span,
+.js .gate:focus-visible > span {
+  /* full strength when hovered, unless the name has been dropped for lack of room */
+  opacity: min(1, calc(var(--gate-alpha, 1) * 1000));
+}
+
+.gate:focus-visible {
+  outline-offset: -4px;
+}
+
+/* a remark pencilled on the floor of the entrance */
+.js .hall-note {
+  display: block;
+  position: absolute;
+  left: calc(50% + clamp(84px, 9vw, 150px));
+  top: calc(var(--open-room) * 0.86);
+  z-index: 1;
+  margin: 0;
+  font-size: 31px;
+  transform: rotate(-5deg);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 200ms linear;
+}
+
+.hall-note svg {
+  position: absolute;
+  right: calc(100% + 8px);
+  bottom: 8px;
+  width: 70px;
+  height: 48px;
+  overflow: visible;
+}
+
+:root[data-mode='band'] .hall-note,
+:root[data-leaving] .hall-note {
+  opacity: 0;
+}
+
+/* ---------- the sheet: the page, in front of the hall ---------- */
+
+#page {
+  position: relative;
+  z-index: 1;
+}
+
+.js #page {
+  margin-top: var(--open-band);
+  /* a short page still covers the rest of the hall */
+  min-height: calc(100vh - var(--strip) - var(--open-band));
+  background: var(--paper);
+  border-top: 1px solid var(--ink);
+}
+
+.js[data-mode='room'] #page {
+  margin-top: var(--open-room);
+  min-height: calc(100vh - var(--strip) - var(--open-room));
+}
+
+.js .colophon {
+  background: var(--paper);
+}
+
+@media (min-width: 1200px) and (pointer: fine) {
+  .js[data-mode='room'] #page {
+    margin-top: 0;
+    background: none;
+    border-top: 0;
+  }
+
+  .js[data-mode='room'] .colophon {
+    background: none;
+  }
+}
+
+/* ---------- windows ---------- */
+
+.win {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bond);
+  border: 1px solid var(--ink);
+  box-shadow: 2px 2px 0 0 var(--rule-2);
+  color: var(--ink);
+}
+
+.win[data-active],
+.win.is-document {
+  box-shadow: 3px 3px 0 0 var(--ink);
+}
+
+.win-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--bar);
+  padding: 0 7px;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+  -webkit-font-smoothing: none;
+  user-select: none;
+}
+
+.win-bar:focus-visible {
+  outline-offset: -3px;
+}
+
+[data-lifted] .win-bar[data-drag] {
+  cursor: grab;
+  touch-action: none;
+}
+
+/* Where windows are laid out in the page, zooming one means nothing: the box is not drawn. */
+.desk:not([data-lifted]) .win-box[data-act='zoom'] {
+  display: none;
+}
+
+[data-lifted] .win[data-dragging] .win-bar {
+  cursor: grabbing;
+}
+
+/* pinstripes either side of the title, only on the window in use */
+.win-bar::before,
+.win-bar::after {
+  content: '';
+  flex: 1;
+  min-width: 8px;
+  height: 11px;
+  order: 2;
+}
+
+.win-bar::after {
+  order: 4;
+}
+
+.win[data-active] .win-bar::before,
+.win[data-active] .win-bar::after,
+.win.is-document .win-bar::before,
+.win.is-document .win-bar::after {
+  background: repeating-linear-gradient(to bottom, var(--ink) 0 1px, transparent 1px 2px);
+}
+
+.win-title {
+  order: 3;
+  flex: none;
+  max-width: 70%;
+  font: inherit;
+  letter-spacing: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink-3);
+}
+
+.win[data-active] .win-title,
+.win.is-document .win-title {
+  color: var(--ink);
+}
+
+.win-box {
+  order: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 13px;
+  height: 13px;
+  border: 1px solid var(--ink);
+  background: var(--bond);
+  color: var(--ink);
+}
+
+.win-box.is-right {
+  order: 5;
+}
+
+.win-box svg {
+  width: 9px;
+  height: 9px;
+  opacity: 0;
+}
+
+.win-box:hover svg,
+.win-box:focus-visible svg {
+  opacity: 1;
+}
+
+.win-box:active {
+  background: var(--ink);
+  color: var(--bond);
+}
+
+.win-box:active svg {
+  opacity: 1;
+}
+
+.win:not([data-active]):not(.is-document) .win-box {
+  border-color: var(--rule-2);
+}
+
+/* a larger target than the box that is drawn */
+.win-box::after {
+  content: '';
+  position: absolute;
+  width: 26px;
+  height: 26px;
+}
+
+.win-box {
+  position: relative;
+}
+
+.win-body {
+  flex: 1;
+  min-height: 0;
+  padding: var(--pad);
+}
+
+.win-body.is-flush {
+  padding: 0;
+}
+
+.win[data-sized] .win-body {
+  overflow: auto;
+}
+
+.win-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--foot);
+  padding: 0 20px 0 10px;
+  border-top: 1px solid var(--rule-2);
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1;
+  -webkit-font-smoothing: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.win-foot > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.win-foot:empty {
+  display: none;
+}
+
+.win-grip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  display: none;
+  cursor: nwse-resize;
+  touch-action: none;
+  background:
+    linear-gradient(135deg, transparent 0 47%, var(--rule-3) 47% 53%, transparent 53% 100%) 4px 4px / 10px 10px no-repeat,
+    linear-gradient(135deg, transparent 0 45%, var(--rule-3) 45% 55%, transparent 55% 100%) 9px 9px / 5px 5px no-repeat;
+}
+
+[data-lifted] .win-grip {
+  display: block;
+}
+
+/* rolled up: only the title bar remains */
+.win[data-shaded] .win-body,
+.win[data-shaded] .win-foot,
+.win[data-shaded] .win-grip {
+  display: none;
+}
+
+.win[data-shaded] .win-bar {
+  border-bottom: 0;
+}
+
+/* ---------- the desk: windows laid out, then lifted ---------- */
+
+.desk {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: var(--gap);
+  align-items: start;
+  padding: var(--gap);
+  /* the hall behind must stay clickable between the windows */
+  pointer-events: none;
+}
+
+.desk > * {
+  pointer-events: auto;
+}
+
+.desk[data-lifted] {
+  display: block;
+  padding: 0;
+  height: var(--desk-h, auto);
+  min-height: calc(100dvh - var(--strip));
+  overflow-x: clip;
+}
+
+.desk[data-lifted] > .win,
+.desk[data-lifted] > * > .win {
+  position: absolute;
+  left: calc(var(--x) * 1px);
+  top: calc(var(--y) * 1px);
+  width: calc(var(--w) * 1px);
+}
+
+.desk[data-lifted] .win[data-sized] {
+  height: calc(var(--h) * 1px);
+}
+
+.desk[data-lifted] .win[data-zoomed] {
+  left: var(--gap);
+  top: var(--gap);
+  width: calc(100% - var(--gap) * 2);
+  height: auto;
+  min-height: calc(100dvh - var(--strip) - var(--gap) * 2);
+  z-index: 900 !important;
+}
+
+/* rolled up, a window is its title bar and nothing else, whatever size it had */
+.desk[data-lifted] .win[data-shaded] {
+  height: auto;
+  min-height: 0;
+}
+
+.desk[data-lifted] .win[data-dragging],
+.desk[data-lifted] .win[data-resizing] {
+  will-change: left, top, width, height;
+}
+
+.desk[data-lifted] .win[data-dragging] {
+  box-shadow: 6px 6px 0 0 var(--ink);
+}
+
+/* ---------- leaving and arriving ---------- */
+
+/*
+ * A page that is left gets out of the way at once; the next one is fed up from below like
+ * a sheet of paper. Neither waits for the walk, which carries on in the hall behind them.
+ * The attributes are set by src/scripts/archive/hall.ts.
+ */
+
+/* the windows of the entrance are left behind, each to its own side */
+:root[data-leaving] .desk .win {
+  transition:
+    opacity 220ms var(--ease),
+    transform 300ms var(--ease);
+  opacity: 0;
+  transform: translate(calc(var(--side, 0) * 70px), 14px) scale(1.04);
+  pointer-events: none;
+}
+
+/* what is written on a sheet goes; the sheet stays for the next page to be written on */
+:root[data-leaving] .page,
+:root[data-leaving] .colophon > * {
+  transition: opacity 180ms linear;
+  opacity: 0;
+}
+
+/* going out to the entrance, the sheet is drawn down and the whole hall comes into view */
+:root[data-leaving='down'] #page,
+:root[data-leaving='down'] .colophon {
+  transition: transform 300ms cubic-bezier(0.5, 0, 0.75, 0.4);
+  transform: translateY(var(--sheet-to, 60vh));
+}
+
+:root[data-arriving] #page,
+:root[data-arriving] .colophon {
+  animation: feed 560ms var(--ease-out) both;
+}
+
+:root[data-arriving] .arrive,
+:root[data-arriving] .desk .win {
+  animation: arrive 460ms var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 60ms + 120ms);
+}
+
+@keyframes feed {
+  from {
+    transform: translateY(var(--sheet-from, 0px));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- zoom rectangles ---------- */
+
+.zoomrects {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.zoomrects i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 1px solid var(--ink);
+  opacity: 0;
+}
+
+/* ---------- colophon: the last line of every page ---------- */
+
+.colophon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 28px;
+  padding: 18px var(--gap) 22px;
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--ink-3);
+  -webkit-font-smoothing: none;
+}
+
+.colophon q {
+  quotes: none;
+  font-family: var(--f-typed);
+  font-size: var(--t-typed-sm);
+  font-style: italic;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-2);
+  -webkit-font-smoothing: antialiased;
+}
+
+.colophon a {
+  color: inherit;
+}
+
+/* ---------- finder ---------- */
+
+.finder {
+  width: min(540px, calc(100vw - 32px));
+  max-height: min(540px, calc(100dvh - 96px));
+  margin: 80px auto auto;
+  padding: 0;
+  border: 1px solid var(--ink);
+  background: var(--bond);
+  color: var(--ink);
+  box-shadow: 4px 4px 0 0 var(--ink);
+  overflow: hidden;
+}
+
+.finder[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.finder::backdrop {
+  background: color-mix(in srgb, var(--paper) 72%, transparent);
+}
+
+.finder-input {
+  width: 100%;
+  padding: 14px 16px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  background: var(--bond);
+  font-family: var(--f-typed);
+  font-size: 17px;
+  outline: none;
+}
+
+.finder-input::placeholder {
+  color: var(--ink-3);
+}
+
+.finder-list {
+  overflow: auto;
+  padding: 4px 0;
+}
+
+.finder-list a {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 7px 16px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.finder-list a .label {
+  flex: none;
+  min-width: 72px;
+}
+
+.finder-list [data-current],
+.finder-list a:hover {
+  background: var(--ink);
+  color: var(--bond);
+}
+
+.finder-list [data-current] .label,
+.finder-list a:hover .label {
+  color: inherit;
+}
+
+.finder-empty {
+  padding: 18px 16px;
+  color: var(--ink-3);
+}
+
+.finder-foot {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 7px 16px;
+  border-top: 1px solid var(--rule-2);
+}
+
+/* ---------- print: the page without the building ---------- */
+
+@media print {
+  .strip,
+  .hall,
+  .skip,
+  .colophon,
+  .finder,
+  .win-box,
+  .win-grip {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: none;
+  }
+
+  .js #page {
+    margin-top: 0;
+    min-height: 0;
+    border-top: 0;
+  }
+
+  .win {
+    box-shadow: none !important;
+  }
+}

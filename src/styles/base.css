@@ -1,0 +1,319 @@
+/*
+ * BASE
+ * Reset, the four faces, links, focus, selection, scrollbars.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--strip) + 16px);
+  background: var(--paper);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-typed);
+  font-size: var(--t-typed);
+  line-height: 1.6;
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol,
+dl,
+dd,
+figure,
+blockquote,
+pre {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- the four faces ---------- */
+
+/* machine: tiny, exact, upper case */
+.machine,
+.label {
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 400;
+  -webkit-font-smoothing: none;
+}
+
+.label {
+  color: var(--ink-3);
+}
+
+/* typed: all running text */
+.typed {
+  font-family: var(--f-typed);
+  font-size: var(--t-typed);
+  line-height: 1.6;
+}
+
+/* dots: the few large words. Set light and large; the dots should be countable. */
+.dots {
+  font-family: var(--f-dots);
+  font-variation-settings: 'ROND' 100;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  text-wrap: balance;
+}
+
+.dots-xl {
+  font-size: clamp(54px, 7.4vw, 108px);
+  font-weight: 400;
+}
+
+.dots-lg {
+  font-size: clamp(38px, 4.6vw, 64px);
+  font-weight: 500;
+}
+
+.dots-md {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.dots-sm {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* hand: a remark in red ballpoint */
+.hand {
+  font-family: var(--f-hand);
+  font-size: var(--t-hand);
+  line-height: 0.95;
+  font-weight: 400;
+  color: var(--red);
+  letter-spacing: 0.01em;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* headings inside text are typed too: capitals and an underline, as on a typewriter */
+.head-1,
+.head-2,
+.head-3 {
+  font-family: var(--f-typed);
+  font-weight: 700;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.head-1 {
+  font-size: 24px;
+  letter-spacing: -0.01em;
+}
+
+.head-2 {
+  font-size: 18.5px;
+}
+
+.head-3 {
+  font-size: var(--t-typed);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- links: ink, underlined in red ---------- */
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: var(--red);
+}
+
+a:hover {
+  color: var(--red);
+}
+
+/* A link that leaves the site says so. */
+a[target='_blank']:not(.plain)::after {
+  content: '\2197';
+  display: inline-block;
+  margin-left: 0.16em;
+  font-family: var(--f-machine);
+  font-size: 0.7em;
+  text-decoration: none;
+  vertical-align: 0.14em;
+  color: var(--ink-3);
+}
+
+a.plain,
+a.plain:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+b,
+strong {
+  font-weight: 700;
+}
+
+/* ---------- focus and selection ---------- */
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ---------- scrollbars: a thin ruled track ---------- */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-3) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-left: 1px solid var(--rule);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bond);
+  border: 1px solid var(--ink);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ---------- helpers ---------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip {
+  position: fixed;
+  top: 6px;
+  left: 6px;
+  z-index: 1000;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

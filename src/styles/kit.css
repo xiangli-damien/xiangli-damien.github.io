@@ -1,0 +1,321 @@
+/*
+ * KIT
+ * Small parts used on every page: form fields, tags, buttons, ledgers, marks.
+ */
+
+/* ---------- form fields: a small label over a typed value ---------- */
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+  gap: 12px 20px;
+}
+
+.field {
+  min-width: 0;
+}
+
+.field.is-wide {
+  grid-column: 1 / -1;
+}
+
+.field > dt,
+.field > .field-k {
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--ink-3);
+  -webkit-font-smoothing: none;
+}
+
+.field > dd,
+.field > .field-v {
+  margin: 0;
+  font-family: var(--f-typed);
+  font-size: var(--t-typed);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- tags ---------- */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 7px 2px;
+  border: 1px solid var(--rule-2);
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--ink-2);
+  white-space: nowrap;
+  -webkit-font-smoothing: none;
+}
+
+.tag.is-solid {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bond);
+}
+
+.tag.is-red {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+a.tag {
+  text-decoration: none;
+}
+
+a.tag:hover,
+button.tag:hover,
+.tag[aria-pressed='true'],
+.tag[aria-current='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bond);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 5px 12px 4px;
+  border: 1px solid var(--ink);
+  background: var(--bond);
+  box-shadow: 2px 2px 0 0 var(--ink);
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-font-smoothing: none;
+}
+
+.btn:hover {
+  background: var(--ink);
+  color: var(--bond);
+}
+
+.btn:active,
+.btn[aria-pressed='true'] {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.btn[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--bond);
+}
+
+.btn.is-quiet {
+  box-shadow: none;
+  border-color: var(--rule-2);
+}
+
+.btn.is-quiet:active {
+  transform: none;
+}
+
+a.btn[target='_blank']::after {
+  margin-left: 0;
+  font-size: 1em;
+  vertical-align: 0;
+  color: inherit;
+}
+
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ---------- inputs ---------- */
+
+.input,
+.select {
+  width: 100%;
+  min-height: 30px;
+  padding: 5px 10px 4px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--bond);
+  font-family: var(--f-typed);
+  font-size: var(--t-typed);
+  line-height: 1.3;
+  appearance: none;
+}
+
+.input::placeholder {
+  color: var(--ink-3);
+}
+
+.input:focus-visible,
+.select:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 1px;
+}
+
+.select {
+  padding-right: 30px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 50%,
+    calc(100% - 11px) 50%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+}
+
+/* ---------- ledger: ruled rows with machine headings ---------- */
+
+.ledger {
+  width: 100%;
+  font-family: var(--f-typed);
+  font-size: var(--t-typed);
+  line-height: 1.4;
+}
+
+.ledger th {
+  padding: 6px 12px 5px;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--ink-3);
+  white-space: nowrap;
+  -webkit-font-smoothing: none;
+}
+
+.ledger td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+.ledger tr:last-child td {
+  border-bottom: 0;
+}
+
+.ledger .is-machine {
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+  -webkit-font-smoothing: none;
+  line-height: 1.9;
+}
+
+.ledger tbody tr:hover td {
+  background: var(--paper-2);
+}
+
+/* ---------- stamp ---------- */
+
+.stamp {
+  display: inline-block;
+  padding: 4px 9px 2px;
+  border: 2px solid var(--red);
+  font-family: var(--f-typed);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--red);
+  transform: rotate(-4deg);
+}
+
+/* ---------- rules and headings inside windows ---------- */
+
+.rule {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: var(--rule-2);
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  line-height: 1.3;
+  -webkit-font-smoothing: none;
+}
+
+.heading > .count {
+  margin-left: auto;
+  color: var(--ink-3);
+}
+
+/* typewriter emphasis: underline, and striking a word twice for weight */
+.under {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: currentColor;
+}
+
+mark,
+.marker {
+  padding: 0 0.1em;
+  background: var(--red-wash);
+  color: inherit;
+}
+
+kbd,
+.kbd {
+  display: inline-block;
+  min-width: 1.7em;
+  padding: 1px 5px 0;
+  border: 1px solid var(--rule-2);
+  border-bottom-width: 2px;
+  background: var(--bond);
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.5;
+  -webkit-font-smoothing: none;
+}
+
+.empty {
+  padding: 28px var(--pad);
+  text-align: center;
+  color: var(--ink-3);
+}

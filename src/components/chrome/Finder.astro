@@ -1,0 +1,78 @@
+---
+/**
+ * Quick jump. Ctrl/Cmd K opens it; typing narrows the list; Enter goes.
+ */
+import { HALLS, CATEGORIES, getNotes, getLife, getProjects, getPublications } from '../../lib/content';
+import { profile } from '../../lib/data';
+
+const [notes, life, projects, publications] = await Promise.all([
+  getNotes(),
+  getLife(),
+  getProjects(),
+  getPublications(),
+]);
+
+interface Entry {
+  kind: string;
+  label: string;
+  href: string;
+  keywords?: string;
+}
+
+const entries: Entry[] = [
+  ...Object.values(HALLS).map((hall) => ({ kind: `Hall ${hall.no}`, label: hall.title, href: hall.href })),
+  ...notes.map((note) => ({
+    kind: CATEGORIES[note.data.category].code,
+    label: note.data.title,
+    href: `/blog/${note.id}/`,
+    keywords: `${note.data.tags.join(' ')} ${CATEGORIES[note.data.category].label} note`,
+  })),
+  ...publications.map((pub) => ({
+    kind: 'Paper',
+    label: pub.data.title,
+    href: `/pubs/#${pub.id}`,
+    keywords: `${pub.data.venue} ${pub.data.year} ${pub.data.authors.join(' ')}`,
+  })),
+  ...projects.map((project) => ({
+    kind: 'Project',
+    label: project.data.title,
+    href: `/projects/#${project.id}`,
+    keywords: project.data.tags.join(' '),
+  })),
+  ...life.map((entry) => ({
+    kind: 'Life',
+    label: entry.data.listTitle ?? entry.data.title,
+    href: `/life/${entry.id}/`,
+    keywords: `${entry.data.title} ${entry.data.tags.join(' ')}`,
+  })),
+  ...(profile.links.cv ? [{ kind: 'File', label: 'Résumé (PDF)', href: profile.links.cv, keywords: 'cv resume' }] : []),
+  { kind: 'Mail', label: profile.email, href: `mailto:${profile.email}`, keywords: 'email contact' },
+];
+---
+
+<dialog class="finder" data-finder aria-label="Find a page">
+  <input
+    class="finder-input"
+    type="text"
+    data-finder-input
+    placeholder="Where to?"
+    autocomplete="off"
+    spellcheck="false"
+    aria-label="Type to narrow the list"
+  />
+  <div class="finder-list">
+    {
+      entries.map((entry) => (
+        <a class="plain" href={entry.href} data-finder-item data-keywords={entry.keywords}>
+          <span class="label">{entry.kind}</span>
+          <span>{entry.label}</span>
+        </a>
+      ))
+    }
+    <p class="finder-empty" data-finder-empty hidden>Nothing filed under that.</p>
+  </div>
+  <div class="finder-foot label">
+    <span><kbd>↑</kbd> <kbd>↓</kbd> choose &nbsp; <kbd>↵</kbd> open</span>
+    <button type="button" class="label" data-close-finder><kbd>Esc</kbd> close</button>
+  </div>
+</dialog>

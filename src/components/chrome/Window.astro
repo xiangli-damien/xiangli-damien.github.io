@@ -1,0 +1,121 @@
+---
+/**
+ * A window.
+ *
+ * On the entrance desk the boxes close it, roll it up and zoom it.
+ * On an inner page (`document`) the window is the page itself: it cannot be dragged,
+ * and its close box leads back to the entrance.
+ */
+interface Props {
+  id: string;
+  title: string;
+  /** text for the status bar; a slot named "status" takes precedence */
+  status?: string;
+  /** start closed; it can be opened from the Windows menu or an opener */
+  closed?: boolean;
+  /** receives focus first */
+  primary?: boolean;
+  /** the window is the page: no dragging, close leads back to the entrance */
+  document?: boolean;
+  /** remove the body padding */
+  flush?: boolean;
+  /** -1 or 1: the side the window leaves by when the visitor walks into the hall */
+  side?: -1 | 0 | 1;
+  class?: string;
+  style?: string;
+}
+
+const {
+  id,
+  title,
+  status,
+  closed = false,
+  primary = false,
+  document = false,
+  flush = false,
+  side = 0,
+  class: className,
+  style,
+} = Astro.props;
+
+const titleId = `win-${id}-title`;
+const hasStatus = Boolean(status) || Astro.slots.has('status');
+---
+
+<section
+  class:list={['win', { 'is-document': document }, className]}
+  data-win={id}
+  data-title={title}
+  aria-labelledby={titleId}
+  hidden={closed}
+  data-closed-by-default={closed ? '' : undefined}
+  data-primary={primary ? '' : undefined}
+  style={`--side:${side};${style ?? ''}`}
+>
+  <header
+    class="win-bar"
+    data-drag={document ? undefined : ''}
+    tabindex={document ? undefined : 0}
+    role={document ? undefined : 'group'}
+    aria-roledescription={document ? undefined : 'title bar'}
+    aria-label={document ? undefined : `${title}. Arrow keys move this window, Enter rolls it up.`}
+  >
+    {
+      document ? (
+        <a class="win-box plain" href="/" aria-label="Close and return to the entrance" title="Close">
+          <svg viewBox="0 0 9 9" aria-hidden="true">
+            <path d="M1 1l7 7M8 1l-7 7" stroke="currentColor" fill="none" />
+          </svg>
+        </a>
+      ) : (
+        <button class="win-box" type="button" data-act="close" aria-label={`Close ${title}`} title="Close">
+          <svg viewBox="0 0 9 9" aria-hidden="true">
+            <path d="M1 1l7 7M8 1l-7 7" stroke="currentColor" fill="none" />
+          </svg>
+        </button>
+      )
+    }
+    <h2 class="win-title" id={titleId}>{title}</h2>
+    {
+      !document && (
+        <button
+          class="win-box is-right"
+          type="button"
+          data-act="shade"
+          aria-label={`Roll up ${title}`}
+          aria-expanded="true"
+          title="Roll up"
+        >
+          <svg viewBox="0 0 9 9" aria-hidden="true" shape-rendering="crispEdges">
+            <path d="M1 4.5h7" stroke="currentColor" fill="none" />
+          </svg>
+        </button>
+      )
+    }
+    <button
+      class="win-box is-right"
+      type="button"
+      data-act="zoom"
+      aria-label={`Zoom ${title}`}
+      aria-pressed="false"
+      title="Zoom"
+    >
+      <svg viewBox="0 0 9 9" aria-hidden="true" shape-rendering="crispEdges">
+        <path d="M1.5 1.5h6v6h-6z" stroke="currentColor" fill="none" />
+      </svg>
+    </button>
+  </header>
+  <div class:list={['win-body', { 'is-flush': flush }]}>
+    <slot />
+  </div>
+  {
+    hasStatus && (
+      <footer class="win-foot">
+        <slot name="status">
+          <span>{status}</span>
+        </slot>
+      </footer>
+    )
+  }
+  {!document && <span class="win-grip" data-resize aria-hidden="true" />}
+</section>

@@ -1,0 +1,123 @@
+/*
+ * TOKENS
+ * Paper, ink, and one red: that is the palette of the pages.
+ * The drawings (the hall, the work board) have two more spot colours, an amber and a blue,
+ * and the tan of cabinets and folders. They are for things on file, never for surfaces.
+ * Every colour, size and face used on the site is named here; nothing else may be hard-coded.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- paper ---- */
+  --paper: #f6f3ec; /* the room: a warm white with nothing in it */
+  --paper-2: #efebe2; /* the same paper in shade: wells, quiet panels, alternate rows */
+  --bond: #fffefa; /* window faces */
+
+  /* ---- ink ---- */
+  --ink: #15130f;
+  --ink-2: #4b4740; /* secondary text */
+  --ink-3: #6f6a61; /* labels and captions (5:1 on paper) */
+  --rule: rgba(21, 19, 15, 0.12); /* hairlines */
+  --rule-2: rgba(21, 19, 15, 0.28);
+  --rule-3: rgba(21, 19, 15, 0.6);
+
+  /* ---- the red ---- */
+  --red: #cf2a1d; /* carpet, pencil marks, the thing in use. Never more than a tenth of a view. */
+  --red-deep: #a81f15;
+  --red-wash: rgba(207, 42, 29, 0.08);
+
+  /* ---- spot colours: a card, a spine, the tab of a folder, a line in a drawing ---- */
+  --amber: #dc9a1e;
+  --blue: #2c5aa0;
+  --tan: #ebe1ca; /* the cabinets of the hall, as a wash */
+  --kraft: #d7bd8b; /* folders and boxes */
+
+  /* ---- faces ---- */
+  /* dots: the voice of the future - names, hall numbers, the few large words */
+  --f-dots: 'Doto Variable', 'Doto', 'Departure Mono', ui-monospace, monospace;
+  /* machine: what the apparatus prints by itself - chrome, labels, coordinates, read-outs */
+  --f-machine: 'Departure Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* typed: what a person typed - all running text */
+  --f-typed: 'Courier Prime', 'Courier New', Courier, 'STFangsong', 'FangSong', 'Songti SC', 'SimSun', monospace;
+  /* hand: a remark in ballpoint. A few words at a time, never a paragraph. */
+  --f-hand: 'Reenie Beanie', 'Kaiti SC', 'STKaiti', 'KaiTi', cursive;
+
+  /* Departure Mono is a bitmap face: it is only sharp at multiples of 11px. */
+  --t-machine: 11px;
+  --t-typed: 15px;
+  --t-typed-sm: 13.5px;
+  --t-read: 16.5px; /* long reading */
+  --t-hand: 25px;
+
+  /* ---- measures ---- */
+  --strip: 32px; /* height of the system strip */
+  --bar: 26px; /* window title bar */
+  --foot: 22px; /* window status bar */
+  --gap: 28px; /* space between windows */
+  --pad: 20px; /* padding inside a window */
+  /* widest comfortable line of reading text: 66 characters of the typed face, whose
+     characters are 0.6em wide. Written in em because browsers do not agree on `ch`. */
+  --measure: 39.6em;
+
+  /* ---- drawings on the work board read these ---- */
+  --board-paper: var(--bond);
+  --board-ink: var(--ink);
+  --board-soft: #8b857b;
+  --board-faint: rgba(21, 19, 15, 0.1);
+  --board-signal: var(--red);
+  /* second and third voices of a drawing; there is no green, it is given the quiet ink */
+  --board-blue: var(--blue);
+  --board-ochre: var(--amber);
+  --board-green: var(--ink-3);
+  --board-font: 'Departure Mono', ui-monospace, Menlo, monospace;
+
+  /* ---- code listings (Shiki css-variables theme) ---- */
+  --code-foreground: var(--ink);
+  --code-background: transparent;
+  --code-token-constant: var(--ink);
+  --code-token-string: var(--ink-2);
+  --code-token-comment: var(--ink-3);
+  --code-token-keyword: var(--red-deep);
+  --code-token-parameter: var(--ink-2);
+  --code-token-function: var(--ink);
+  --code-token-string-expression: var(--ink-2);
+  --code-token-punctuation: var(--ink-3);
+  --code-token-link: var(--red-deep);
+
+  /* ---- motion ---- */
+  --quick: 120ms;
+  --settle: 260ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/*
+ * AFTER HOURS - the same hall with the lamps low. Warm, never an editor's blue-black.
+ * Opt-in only: the site does not switch to it by itself.
+ */
+:root[data-theme='dusk'] {
+  color-scheme: dark;
+
+  --paper: #211c17;
+  --paper-2: #2a241e;
+  --bond: #2b251f;
+
+  --ink: #f3ede1;
+  --ink-2: #cfc6b6;
+  --ink-3: #a59c8c;
+  --rule: rgba(243, 237, 225, 0.12);
+  --rule-2: rgba(243, 237, 225, 0.28);
+  --rule-3: rgba(243, 237, 225, 0.58);
+
+  --red: #ee5342;
+  --red-deep: #f4796b;
+  --red-wash: rgba(238, 83, 66, 0.12);
+
+  --amber: #e9b04a;
+  --blue: #7da2dc;
+  --tan: #322a22;
+  --kraft: #6d5a3c;
+
+  --board-soft: #a59c8c;
+  --board-faint: rgba(243, 237, 225, 0.12);
+}

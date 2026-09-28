@@ -1,0 +1,24 @@
+---
+/**
+ * The heading of an inner page: hall number, name in dots, one line about it.
+ */
+interface Props {
+  no: string;
+  title: string;
+  lede?: string;
+  /** the title is a sentence rather than a name */
+  long?: boolean;
+  lang?: string;
+}
+const { no, title, lede, long = false, lang } = Astro.props;
+---
+
+<header class="page-head arrive">
+  <span class="page-no" aria-hidden="true">{no}</span>
+  <div>
+    <slot name="crumbs" />
+    <h1 class:list={['page-title', { 'is-long': long }]} lang={lang}>{title}</h1>
+    {lede && <p class="page-lede" lang={lang}>{lede}</p>}
+    <slot />
+  </div>
+</header>

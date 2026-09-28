@@ -1,0 +1,260 @@
+/*
+ * PAGE
+ * Layout of an inner page (a hall): heading, then one or more windows.
+ */
+
+.page {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 0 var(--gap) 40px;
+}
+
+.page.is-wide {
+  width: min(100%, 1320px);
+}
+
+/* the zoom box of the main window widens the page */
+.page[data-wide] {
+  width: 100%;
+}
+
+/* heading: the hall number, its name in dots, one line about it */
+.page-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 22px;
+  align-items: end;
+  padding: 34px 0 26px;
+}
+
+.page-no {
+  grid-row: 1 / span 2;
+  align-self: start;
+  padding-top: 0.5em;
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.08em;
+  color: var(--red);
+  -webkit-font-smoothing: none;
+}
+
+.page-title {
+  font-family: var(--f-dots);
+  font-variation-settings: 'ROND' 100;
+  font-weight: 500;
+  font-size: clamp(44px, 6.4vw, 92px);
+  letter-spacing: 0.01em;
+  line-height: 0.92;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+/* a title that is a sentence (a note, an essay) is set smaller and in lower case */
+.page-title.is-long {
+  font-size: clamp(32px, 4.2vw, 56px);
+  font-weight: 600;
+  line-height: 1;
+  text-transform: none;
+}
+
+/* Chinese titles are set in the face of printed Chinese documents */
+.page-title:lang(zh) {
+  font-family: 'Songti SC', 'STSong', 'Noto Serif CJK SC', 'Source Han Serif SC', 'SimSun', serif;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+}
+
+.page-lede:lang(zh) {
+  font-family: 'STFangsong', 'FangSong', 'Songti SC', 'SimSun', var(--f-typed);
+  font-size: 16px;
+  line-height: 1.7;
+  letter-spacing: 0.03em;
+}
+
+.page-lede {
+  margin-top: 14px;
+  max-width: 37em;
+  font-size: var(--t-typed);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.page-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-top: 12px;
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  -webkit-font-smoothing: none;
+}
+
+.page-meta a {
+  color: inherit;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 14px;
+  font-family: var(--f-machine);
+  font-size: var(--t-machine);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  -webkit-font-smoothing: none;
+}
+
+.crumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  color: var(--red);
+}
+
+.crumbs li + li::before {
+  content: '/';
+  margin-right: 10px;
+  color: var(--rule-3);
+}
+
+/* windows on a page: a main column and, on wide screens, a narrow side column */
+.page-grid {
+  display: grid;
+  gap: var(--gap);
+  align-items: start;
+}
+
+@media (min-width: 1000px) {
+  .page-grid.has-side {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+
+  .page-grid.has-side-left {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .page-side {
+    position: sticky;
+    top: calc(var(--strip) + var(--gap));
+    display: grid;
+    gap: var(--gap);
+    max-height: calc(100dvh - var(--strip) - var(--gap) * 2);
+  }
+
+  .page-side > .win {
+    min-height: 0;
+  }
+
+  .page-side > .win > .win-body {
+    overflow: auto;
+  }
+}
+
+/* a bar of controls at the top of a window */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 10px var(--pad);
+  border-bottom: 1px solid var(--rule-2);
+}
+
+.toolbar .input {
+  flex: 1 1 220px;
+  max-width: 340px;
+}
+
+.toolbar .select {
+  flex: 0 1 150px;
+}
+
+.toolbar-end {
+  margin-left: auto;
+}
+
+/* entries of a list inside a window */
+.entry {
+  padding: 22px var(--pad);
+  border-top: 1px solid var(--rule-2);
+  scroll-margin-top: calc(var(--strip) + 16px);
+}
+
+.entry:first-child {
+  border-top: 0;
+}
+
+.entry:target {
+  box-shadow: inset 3px 0 0 var(--red);
+}
+
+/* a group heading inside a list: a year, a category */
+.group {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px var(--pad) 8px;
+  border-top: 1px solid var(--ink);
+  font-family: var(--f-dots);
+  font-variation-settings: 'ROND' 100;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.group:first-child {
+  border-top: 0;
+}
+
+.group .label {
+  margin-left: auto;
+}
+
+/* pictures in lists are shown in ink until someone looks closely */
+.plate {
+  display: block;
+  border: 1px solid var(--ink);
+  background: var(--paper-2);
+  overflow: hidden;
+}
+
+.plate img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.04);
+  transition: filter var(--settle) linear;
+}
+
+.plate:hover img,
+.plate:focus-visible img,
+.entry:hover .plate img {
+  filter: none;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 0 16px 32px;
+  }
+
+  .page-head {
+    padding: 24px 0 20px;
+    column-gap: 12px;
+  }
+
+  /* the longest name of a hall, PUBLICATIONS, stays on one line down to 320px */
+  .page-title:not(.is-long) {
+    font-size: clamp(30px, 10.6vw, 56px);
+  }
+}
