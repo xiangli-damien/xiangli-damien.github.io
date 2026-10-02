@@ -41,14 +41,10 @@ Personal academic website with a Linux-inspired window manager home page and cle
 │       ├── wm.js           # Window manager
 │       ├── md.js           # Markdown parser
 │       └── util.js         # Shared utilities
-├── data/*.json             # Content: projects, pubs, posts (build.py); news (edit directly)
-├── content/                # Content sources (YAML)
-│   ├── profile.md          # About section
-│   ├── projects.yaml       # Projects (short structured entries)
-│   ├── publications.yaml   # Publications (abstract, bibtex)
-│   ├── cv.yaml
-│   └── demos.yaml
-├── build.py                # Generates data/*.json from page folders
+├── data/*.json             # Content: cv, news, posts, profile, projects, publications
+├── serverless/             # Optional Cloudflare Worker (see serverless/README.md)
+├── robots.txt
+├── sitemap.xml
 └── _config.yml             # Disable Jekyll
 ```
 
@@ -63,16 +59,7 @@ Or: `npx serve`
 
 ## Updating Content
 
-**Option A — Edit JSON directly**: Modify files in `data/` and push. For news (short date+text+url items), edit `data/news.json` directly; no build needed.
-
-**Option B — Use build system**: Edit `content/projects.yaml`, `content/publications.yaml`, or `blog/posts/*.md`, then:
-
-```bash
-pip install pyyaml
-python build.py
-```
-
-Use `python build.py --watch` for auto-rebuild (requires `watchdog`).
+Edit the JSON files in `data/` and push. Blog posts are Markdown files in `blog/posts/`, listed in `data/posts.json`.
 
 ## Deployment
 
