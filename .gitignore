@@ -31,3 +31,7 @@ build/
 
 # Python
 __pycache__/
+
+# Local tooling and scratch files
+.claude/
+project-dump.txt
