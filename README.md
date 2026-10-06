@@ -70,6 +70,7 @@ Push to `xiangli-damien.github.io` on `main`. GitHub Pages serves it automatical
 A redesign of the site is being worked on in the branch
 [`redesign/archive`](https://github.com/xiangli-damien/xiangli-damien.github.io/tree/redesign/archive).
 It is not published: the site online is still built from `main`.
+The redesign is an Astro project; its own README explains how to run it locally.
 
 ## License
 
